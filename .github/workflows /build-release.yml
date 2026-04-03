@@ -1,0 +1,70 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run regression tests
+        run: npm run test:regression
+
+      - name: Build
+        run: npm run build
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+          retention-days: 90
+
+      - name: Create or update latest release
+        run: |
+          gh release delete latest --yes 2>/dev/null || true
+          gh release create latest dist/index.html dist/game.html dist/perk-library.html dist/showcase.html \
+            --title "Latest Build (run ${{ github.run_number }})" \
+            --notes "Built from commit ${{ github.sha }} on $(date -u +%Y-%m-%d)" \
+            --prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
