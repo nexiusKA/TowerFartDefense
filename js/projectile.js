@@ -11,6 +11,7 @@ class Projectile {
     this.dead     = false;
     this.pierceHit = new Set();
     this.dir       = null;
+    this.wobblePhase = Math.random() * Math.PI * 2;  // for organic cloud animation
   }
 
   get effectiveDamage() {
@@ -18,6 +19,7 @@ class Projectile {
   }
 
   update(dt) {
+    this.wobblePhase += dt * 0.007;
     if (this.def.effect === 'pierce') {
       this._movePierce(dt);
     } else {
@@ -32,24 +34,24 @@ class Projectile {
         particles.push(new Particle(
           this.x + (Math.random() - 0.5) * 4,
           this.y + (Math.random() - 0.5) * 4,
-          '#27ae60',
-          (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4,
-          220, 3, 'gas'
+          Math.random() < 0.5 ? '#8dc829' : '#cddc39',
+          (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4 - 0.3,
+          280, 3.5 + Math.random() * 4, 'gas'
         ));
       } else if (this.def.effect === 'aoe') {
         particles.push(new Particle(
           this.x, this.y,
-          '#f39c12',
-          (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.6,
-          180, 2.5, 'spark'
+          Math.random() < 0.5 ? '#c8a020' : '#8a5010',
+          (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5 - 0.2,
+          220, 3 + Math.random() * 4, 'gas'
         ));
       } else if (this.def.effect === 'pierce') {
         particles.push(new Particle(
           this.x + (Math.random() - 0.5) * 3,
           this.y + (Math.random() - 0.5) * 3,
-          '#3498db',
+          Math.random() < 0.5 ? '#4dccff' : '#44ff88',
           (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3,
-          150, 2, 'gas'
+          180, 2.5 + Math.random() * 2.5, 'gas'
         ));
       }
     }
@@ -116,82 +118,137 @@ class Projectile {
 
   draw(ctx) {
     ctx.save();
+    const wp = this.wobblePhase;
+
     if (this.def.effect === 'slow') {
-      // Glowing green gas ball
-      const grd = ctx.createRadialGradient(this.x - 2, this.y - 2, 0, this.x, this.y, 15);
-      grd.addColorStop(0, '#ccffcc');
-      grd.addColorStop(0.35, '#27ae60');
-      grd.addColorStop(1, 'rgba(39,174,96,0)');
-      ctx.fillStyle = grd;
+      // ── Stinker: wobbly yellow-green fart cloud puff ──────────────────
+      // Outer haze
+      const hazeGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 20);
+      hazeGrd.addColorStop(0, 'rgba(180,255,0,0.18)');
+      hazeGrd.addColorStop(1, 'rgba(80,150,0,0)');
+      ctx.fillStyle = hazeGrd;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
       ctx.fill();
-      // Bright core
-      ctx.fillStyle = '#e8ffe8';
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, 4.5, 0, Math.PI * 2);
-      ctx.fill();
+      // 3 overlapping wobbly cloud lobes
+      const lobes = [
+        [0, 0, 9 + Math.sin(wp) * 1.5],
+        [Math.cos(wp + 1.2) * 5, Math.sin(wp + 1.2) * 4, 7 + Math.cos(wp * 1.3) * 1.2],
+        [Math.cos(wp + 3.8) * 6, Math.sin(wp + 3.8) * 5, 7.5 + Math.sin(wp * 0.9) * 1.4],
+      ];
+      for (const [lx, ly, lr] of lobes) {
+        const grd = ctx.createRadialGradient(this.x + lx - lr * 0.2, this.y + ly - lr * 0.2, 0,
+                                             this.x + lx, this.y + ly, lr);
+        grd.addColorStop(0, '#ccff44cc');
+        grd.addColorStop(0.5, '#8dc82988');
+        grd.addColorStop(1, '#4a7a1a00');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(this.x + lx, this.y + ly, lr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Small stink bubbles trailing
+      for (let i = 0; i < 2; i++) {
+        const bx = this.x + Math.cos(wp * 0.8 + i * 2.5) * 11;
+        const by = this.y + Math.sin(wp * 0.8 + i * 2.5) * 9;
+        ctx.fillStyle = 'rgba(180,255,60,0.4)';
+        ctx.beginPath();
+        ctx.arc(bx, by, 2.5 + i, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
     } else if (this.def.effect === 'aoe') {
-      // Glowing orange explosive shell
-      const outerGrd = ctx.createRadialGradient(this.x - 2, this.y - 2, 0, this.x, this.y, 15);
-      outerGrd.addColorStop(0, 'rgba(255,220,100,0.4)');
-      outerGrd.addColorStop(0.5, 'rgba(230,126,34,0.25)');
+      // ── Blaster: big brown/yellow stink bomb blob ─────────────────────
+      const outerGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 18);
+      outerGrd.addColorStop(0, 'rgba(200,160,0,0.22)');
+      outerGrd.addColorStop(0.6, 'rgba(120,70,0,0.12)');
       outerGrd.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = outerGrd;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
       ctx.fill();
-      // Shell body
-      const shellGrd = ctx.createRadialGradient(this.x - 2.5, this.y - 2.5, 0, this.x, this.y, 9);
-      shellGrd.addColorStop(0, '#f5d060');
-      shellGrd.addColorStop(0.45, '#e67e22');
-      shellGrd.addColorStop(1, '#a84500');
-      ctx.fillStyle = shellGrd;
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#f39c12';
+      // 4 lobes for stinky blob shape
+      const bLobes = [
+        [0, 0, 8 + Math.sin(wp * 1.1) * 1.2],
+        [Math.cos(wp * 0.9) * 5, Math.sin(wp * 0.9) * 4, 6.5 + Math.cos(wp) * 1],
+        [Math.cos(wp + 2.1) * 6, Math.sin(wp + 2.1) * 5, 6 + Math.sin(wp * 1.2) * 1.1],
+        [Math.cos(wp + 4.4) * 5, Math.sin(wp + 4.4) * 4, 5.5 + Math.cos(wp * 0.8) * 0.9],
+      ];
+      const bColors = ['#c8a020dd', '#8a5010aa', '#c8a02088', '#a06010aa'];
+      for (let i = 0; i < bLobes.length; i++) {
+        const [lx, ly, lr] = bLobes[i];
+        const grd = ctx.createRadialGradient(this.x + lx - lr * 0.15, this.y + ly - lr * 0.15, 0,
+                                             this.x + lx, this.y + ly, lr);
+        grd.addColorStop(0, '#f5d060cc');
+        grd.addColorStop(0.6, bColors[i]);
+        grd.addColorStop(1, '#3a200500');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(this.x + lx, this.y + ly, lr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Brown slime outline stroke
+      ctx.strokeStyle = 'rgba(160,100,0,0.5)';
       ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 7 + Math.sin(wp) * 0.8, 0, Math.PI * 2);
       ctx.stroke();
 
     } else if (this.def.effect === 'pierce') {
-      // Glowing blue elongated bolt
-      const glowGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 14);
-      glowGrd.addColorStop(0, 'rgba(120,210,255,0.45)');
-      glowGrd.addColorStop(1, 'rgba(52,152,219,0)');
+      // ── Honker: elongated blue-green fart gas streak ──────────────────
+      const glowGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 16);
+      glowGrd.addColorStop(0, 'rgba(100,220,255,0.35)');
+      glowGrd.addColorStop(1, 'rgba(40,180,80,0)');
       ctx.fillStyle = glowGrd;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
       ctx.fill();
 
       if (this.dir) {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(Math.atan2(this.dir.y, this.dir.x));
-        // Diamond bolt shape
-        const boltGrd = ctx.createLinearGradient(-14, 0, 14, 0);
-        boltGrd.addColorStop(0, '#1a5a8e');
-        boltGrd.addColorStop(0.5, '#3498db');
-        boltGrd.addColorStop(1, '#1a5a8e');
-        ctx.fillStyle = boltGrd;
+        // Elongated fart cloud along direction
+        const puffData = [
+          [12, 0, 7 + Math.sin(wp) * 1.3],
+          [0, 0, 6.5 + Math.cos(wp * 1.2) * 1],
+          [-10, Math.sin(wp * 0.9) * 2, 5.5 + Math.sin(wp * 0.8) * 0.9],
+          [-18, Math.sin(wp * 1.1) * 2.5, 4 + Math.cos(wp) * 0.7],
+        ];
+        const puffCols = [
+          'rgba(100,220,255,0.7)',
+          'rgba(60,200,100,0.65)',
+          'rgba(80,200,180,0.55)',
+          'rgba(40,160,80,0.4)',
+        ];
+        for (let i = 0; i < 4; i++) {
+          const [puffX, puffY, puffRadius] = puffData[i];
+          const grd = ctx.createRadialGradient(puffX - puffRadius * 0.15, puffY - puffRadius * 0.15, 0, puffX, puffY, puffRadius);
+          grd.addColorStop(0, '#b8ffee');
+          grd.addColorStop(0.5, puffCols[i]);
+          grd.addColorStop(1, 'rgba(40,180,80,0)');
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(puffX, puffY, puffRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // Central streak
+        const streakGrd = ctx.createLinearGradient(-18, 0, 14, 0);
+        streakGrd.addColorStop(0, 'rgba(40,180,120,0)');
+        streakGrd.addColorStop(0.6, 'rgba(120,240,200,0.5)');
+        streakGrd.addColorStop(1, '#b8ffee88');
+        ctx.fillStyle = streakGrd;
         ctx.beginPath();
-        ctx.moveTo(-14, 0);
-        ctx.lineTo(-5, -3.5);
-        ctx.lineTo(14, 0);
-        ctx.lineTo(-5, 3.5);
-        ctx.closePath();
-        ctx.fill();
-        // Bright core streak
-        ctx.fillStyle = '#b8e8ff';
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 9, 1.4, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 16, 2.5, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       } else {
-        ctx.fillStyle = '#3498db';
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 7);
+        grd.addColorStop(0, '#b8ffeecc');
+        grd.addColorStop(1, '#3498db00');
+        ctx.fillStyle = grd;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 6, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, 7, 0, Math.PI * 2);
         ctx.fill();
       }
     }
