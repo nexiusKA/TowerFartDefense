@@ -13,6 +13,7 @@ function showMessage(text) {
 
 // Wire up custom audio file inputs
 initAudioFileInputs();
+loadDefaultSounds();
 
 // Boot
 const game = new Game();

@@ -37,7 +37,7 @@ const TOWER_DEFS = {
     name: 'Crusher', cost: 110, sellRatio: 0.6,
     color: '#5588cc', color2: '#88bbff',
     range: 95, damage: 9, fireRate: 900,
-    sound: 'stinker',
+    sound: 'fogger',
     upgradeCost: 85,
     upgradeDmg: 5, upgradeRange: 15, upgradeFireRate: -120,
     desc: 'Metal bar slams down · Hits all in range',

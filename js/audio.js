@@ -3,7 +3,25 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-const customSounds = { stinker: null, blaster: null, honker: null };
+const customSounds = { stinker: null, blaster: null, honker: null, fogger: null };
+
+// Default fart sounds mapped to each tower type
+const DEFAULT_SOUNDS = {
+  stinker: 'voice_09-03-2026_01-07-01.mp3',
+  blaster: 'voice_28-03-2026_13-55-38.mp3',
+  honker:  'voice_28-03-2026_13-59-31.mp3',
+  fogger:  'voice_28-03-2026_14-05-59.mp3',
+};
+const defaultSounds = { stinker: null, blaster: null, honker: null, fogger: null };
+
+function loadDefaultSounds() {
+  Object.entries(DEFAULT_SOUNDS).forEach(([type, file]) => {
+    const audio = new Audio(file);
+    audio.volume = 0.4;
+    audio.addEventListener('error', () => { defaultSounds[type] = null; });
+    defaultSounds[type] = audio;
+  });
+}
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
@@ -44,16 +62,17 @@ function playFallbackSound(type) {
 }
 
 function playSound(type) {
-  if (customSounds[type]) {
-    customSounds[type].currentTime = 0;
-    customSounds[type].play().catch(() => {});
+  const snd = customSounds[type] || defaultSounds[type];
+  if (snd) {
+    snd.currentTime = 0;
+    snd.play().catch(() => {});
   } else {
     playFallbackSound(type);
   }
 }
 
 function initAudioFileInputs() {
-  ['stinker', 'blaster', 'honker'].forEach(t => {
+  ['stinker', 'blaster', 'honker', 'fogger'].forEach(t => {
     const el = document.getElementById('audio' + t.charAt(0).toUpperCase() + t.slice(1));
     if (!el) return;
     el.addEventListener('change', function () {
