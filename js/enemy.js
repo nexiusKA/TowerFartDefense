@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ENEMY  (coordinates in logical space)
 // ─────────────────────────────────────────────────────────────────────────────
+const STEALTH_CYCLE_MS = 2000;  // ms each stealth phase lasts (visible / invisible)
 class Enemy {
   constructor(type, hpScale = 1) {
     const def = ENEMY_DEFS[type];
@@ -66,7 +67,7 @@ class Enemy {
     // Stealth cycling
     if (this.isStealthy) {
       this.stealthCycle  += dt;
-      this.stealthVisible = Math.floor(this.stealthCycle / 2000) % 2 === 0;
+      this.stealthVisible = Math.floor(this.stealthCycle / STEALTH_CYCLE_MS) % 2 === 0;
     }
 
     // Poison damage

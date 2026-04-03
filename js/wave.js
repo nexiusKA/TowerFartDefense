@@ -23,7 +23,7 @@ function buildWave(w) {
   if (fast)    entries.push({ type: 'fast',    count: fast,    interval: Math.max(350, 900 - w * 20), hpScale });
   if (tank)    entries.push({ type: 'tank',    count: tank,    interval: Math.max(750, 1800 - w * 40), hpScale });
   if (stealth) entries.push({ type: 'stealth', count: stealth, interval: Math.max(450, 1000 - w * 25), hpScale });
-  if (swarm)   entries.push({ type: 'swarm',   count: swarm,   interval: Math.max(120, 350 - w * 15), hpScale: 1 });
+  if (swarm)   entries.push({ type: 'swarm', count: swarm, interval: Math.max(120, 350 - w * 15), hpScale: 1 }); // swarms stay fragile by design
 
   // Flatten into individual spawn entries
   const queue = [];

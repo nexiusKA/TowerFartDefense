@@ -159,7 +159,7 @@ class Game {
         const x = c * TILE, y = r * TILE;
         const t = MAP_GRID[r][c];
 
-        // Tile fill colour
+        // Tile fill color
         switch (t) {
           case T_BUILDING: ctx.fillStyle = '#192a42'; break;
           case T_ROAD:     ctx.fillStyle = '#3a3a3a'; break;

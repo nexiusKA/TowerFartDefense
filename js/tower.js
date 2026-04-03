@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // TOWER  (coordinates in logical space)
 // ─────────────────────────────────────────────────────────────────────────────
+const MIN_FIRE_RATE_MS = 200;  // fastest any tower can shoot (ms between shots)
 class Tower {
   constructor(type, padIndex, x, y) {
     this.type     = type;
@@ -16,7 +17,7 @@ class Tower {
     this.ringAnim  = 0;
   }
 
-  get fireRate()    { return Math.max(200, this.def.fireRate + (this.level - 1) * this.def.upgradeFireRate); }
+  get fireRate()    { return Math.max(MIN_FIRE_RATE_MS, this.def.fireRate + (this.level - 1) * this.def.upgradeFireRate); }
   get damage()      { return this.def.damage + (this.level - 1) * this.def.upgradeDmg; }
   get upgradeCost() { return this.def.upgradeCost * this.level; }
   get sellValue()   { return Math.floor(this.def.cost * this.def.sellRatio + (this.level - 1) * this.def.upgradeCost * 0.4); }
