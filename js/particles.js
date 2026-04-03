@@ -209,6 +209,34 @@ function spawnDeathBurst(x, y, color) {
   }
 }
 
+function spawnMetalImpact(x, y, range) {
+  addScreenShake(6);
+  const sparkColors = ['#88bbff', '#aaccff', '#ffffff', '#5588cc', '#ffeeaa'];
+  // Metal shards / sparks radiating outward
+  for (let i = 0; i < 22; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1.2 + Math.random() * 4.5;
+    particles.push(new Particle(
+      x + (Math.random() - 0.5) * range * 0.8,
+      y + (Math.random() - 0.5) * 10,
+      sparkColors[Math.floor(Math.random() * sparkColors.length)],
+      Math.cos(angle) * speed, Math.sin(angle) * speed - 0.8,
+      280 + Math.random() * 240, 2 + Math.random() * 3, 'spark'
+    ));
+  }
+  // Small debris circles
+  for (let i = 0; i < 8; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.5 + Math.random() * 2.0;
+    particles.push(new Particle(
+      x + (Math.random() - 0.5) * range * 0.5, y,
+      '#6699cc',
+      Math.cos(angle) * speed, Math.sin(angle) * speed,
+      350 + Math.random() * 250, 3 + Math.random() * 4, 'circle'
+    ));
+  }
+}
+
 function spawnDustTrail(x, y) {
   particles.push(new Particle(
     x + (Math.random() - 0.5) * 10, y + 10,
