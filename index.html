@@ -16,6 +16,16 @@
     <div class="stat-row"><span>❤️ Health</span><span class="stat-val" id="statHealth">20</span></div>
     <div class="stat-row"><span>💰 Gold</span><span class="stat-val" id="statGold">150</span></div>
     <div class="stat-row"><span>🌊 Wave</span><span class="stat-val" id="statWave">0</span></div>
+    <div id="bossAlert" style="display:none;text-align:center;padding:3px 0;">
+      <span style="color:#ff3344;font-weight:bold;font-size:12px;letter-spacing:1px;">💀 BOSS WAVE!</span>
+    </div>
+    <div id="waveProgressWrap" style="display:none;padding:0 2px;">
+      <div style="height:7px;background:#111;border-radius:4px;overflow:hidden;border:1px solid #00ffee22">
+        <div id="waveProgress" style="height:100%;background:linear-gradient(90deg,#00bbcc,#00ffee);width:0%;transition:width 0.35s;border-radius:4px"></div>
+      </div>
+    </div>
+    <div id="waveComposition" style="display:none;font-size:10px;color:#88bbcc;text-align:center;letter-spacing:1px;"></div>
+    <div id="nextBossInfo" style="display:none;font-size:10px;color:#ff334455;text-align:right;"></div>
     <div class="stat-row"><span>💀 Kills</span><span class="stat-val" id="statKills">0</span></div>
     <div class="stat-row"><span>👾 Enemies</span><span class="stat-val" id="statEnemies">0</span></div>
 
