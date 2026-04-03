@@ -1081,7 +1081,7 @@ class Game {
         this._deselectTower();
       }
       // Number keys 1-4 to select tower types
-      const towerKeys = ['1', '2', '3', '4'];
+      const towerKeys = ['1', '2', '3', '4', '5'];
       const towerTypes = Object.keys(TOWER_DEFS);
       const idx = towerKeys.indexOf(e.key);
       if (idx !== -1 && towerTypes[idx]) {

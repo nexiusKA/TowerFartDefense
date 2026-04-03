@@ -258,6 +258,42 @@ function spawnFartCloudSlam(x, y, range) {
   }
 }
 
+// Spawns a massive cyan shockwave explosion for the Toilet Brush super blast tower.
+function spawnSuperBlast(x, y, range) {
+  addScreenShake(14);
+  const colors = ['#00ddff', '#00aacc', '#88eeff', '#ffffff', '#00ffff', '#aaffff'];
+  // Massive ring of cyan gas particles
+  for (let i = 0; i < 40; i++) {
+    const angle = (i / 40) * Math.PI * 2 + Math.random() * 0.3;
+    const speed = 1.5 + Math.random() * 4.5;
+    const dist  = range * (0.2 + Math.random() * 0.8);
+    particles.push(new Particle(
+      x + Math.cos(angle) * dist * 0.4, y + Math.sin(angle) * dist * 0.4,
+      colors[Math.floor(Math.random() * colors.length)],
+      Math.cos(angle) * speed, Math.sin(angle) * speed * 0.8 - 0.6,
+      600 + Math.random() * 600, 5 + Math.random() * 12, 'gas'
+    ));
+  }
+  // White/cyan smoke clouds
+  for (let i = 0; i < 14; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    particles.push(new Particle(
+      x + (Math.random() - 0.5) * range * 0.5, y + (Math.random() - 0.5) * range * 0.5,
+      Math.random() < 0.5 ? '#aaeeff' : '#cccccc',
+      Math.cos(angle) * 0.5, Math.sin(angle) * 0.5 - 0.9,
+      800 + Math.random() * 500, 8 + Math.random() * 10, 'smoke'
+    ));
+  }
+  // Cyan stink lines
+  for (let i = 0; i < 10; i++) {
+    particles.push(new StinkLine(
+      x + (Math.random() - 0.5) * range,
+      y + (Math.random() - 0.5) * range * 0.4,
+      colors[Math.floor(Math.random() * colors.length)]
+    ));
+  }
+}
+
 function spawnDustTrail(x, y) {
   particles.push(new Particle(
     x + (Math.random() - 0.5) * 10, y + 10,

@@ -43,6 +43,16 @@ const TOWER_DEFS = {
     desc: 'Toxic cloud slams down · Hits all in range',
     effect: 'cloud',
   },
+  superblast: {
+    name: 'Toilet Brush', cost: 200, sellRatio: 0.6,
+    color: '#00ccff', color2: '#88eeff',
+    range: 115, damage: 50, fireRate: 3000,
+    sound: 'superblast',
+    upgradeCost: 120,
+    upgradeDmg: 20, upgradeRange: 15, upgradeFireRate: -400,
+    desc: 'Massive AOE blast · Hits ALL enemies in range',
+    effect: 'superblast',
+  },
 };
 
 const ENEMY_DEFS = {
