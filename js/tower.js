@@ -77,12 +77,14 @@ class Tower {
     const s = 22;
     const x = this.x, y = this.y;
 
-    // Range ring when selected
+    // ── Range ring when selected ──────────────────────────────────────────
     if (this.selected) {
       ctx.save();
+      ctx.shadowColor = this.def.color;
+      ctx.shadowBlur  = 10;
       ctx.strokeStyle = this.def.color;
       ctx.lineWidth   = 1.5;
-      ctx.globalAlpha = 0.35;
+      ctx.globalAlpha = 0.5;
       ctx.setLineDash([6, 4]);
       ctx.beginPath();
       ctx.arc(x, y, this.range, 0, Math.PI * 2);
@@ -91,24 +93,30 @@ class Tower {
       ctx.restore();
     }
 
-    // Fogger: permanent pulsing cloud aura
+    // ── Fogger: permanent pulsing range aura ──────────────────────────────
     if (this.type === 'fogger') {
       const pulse = 0.5 + 0.5 * Math.sin(this.ringAnim * 3);
       ctx.save();
-      ctx.globalAlpha = 0.08 + 0.05 * pulse;
-      ctx.fillStyle   = this.def.color;
+      const auraGrd = ctx.createRadialGradient(x, y, 0, x, y, this.range);
+      auraGrd.addColorStop(0, this.def.color + '00');
+      auraGrd.addColorStop(0.7, this.def.color + '18');
+      auraGrd.addColorStop(1,   this.def.color + '00');
+      ctx.globalAlpha = 0.6 + 0.4 * pulse;
+      ctx.fillStyle = auraGrd;
       ctx.beginPath();
       ctx.arc(x, y, this.range * (0.92 + 0.08 * pulse), 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // Flash ring when firing
+    // ── Flash ring when firing ────────────────────────────────────────────
     if (this.flashTimer > 0) {
       ctx.save();
       const prog = this.flashTimer / (this.type === 'fogger' ? 350 : 150);
-      ctx.globalAlpha = prog * 0.55;
-      ctx.fillStyle   = this.def.color2;
+      const flashGrd = ctx.createRadialGradient(x, y, s, x, y, s + 14 + (1 - prog) * 22);
+      flashGrd.addColorStop(0, this.def.color2 + Math.min(255, Math.round(prog * 255)).toString(16).padStart(2, '0'));
+      flashGrd.addColorStop(1, this.def.color2 + '00');
+      ctx.fillStyle = flashGrd;
       ctx.beginPath();
       ctx.arc(x, y, s + 14 + (1 - prog) * 22, 0, Math.PI * 2);
       ctx.fill();
@@ -117,38 +125,126 @@ class Tower {
 
     ctx.save();
 
-    // Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    // ── Drop shadow ───────────────────────────────────────────────────────
+    ctx.fillStyle = 'rgba(0,0,0,0.32)';
     ctx.beginPath();
-    ctx.ellipse(x, y + s * 0.82, s * 0.9, s * 0.28, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + 3, y + s * 0.86, s * 0.88, s * 0.26, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = this.def.color;
-
+    // ── Tower body by type ────────────────────────────────────────────────
     if (this.type === 'stinker') {
+      // Bio-hazard gas tower — green cylinder
+      const bodyGrd = ctx.createLinearGradient(x - s * 0.55, 0, x + s * 0.55, 0);
+      bodyGrd.addColorStop(0, '#1a8a3e');
+      bodyGrd.addColorStop(0.4, '#27ae60');
+      bodyGrd.addColorStop(1, '#115530');
+      ctx.fillStyle = bodyGrd;
       ctx.beginPath();
       ctx.roundRect(x - s * 0.55, y - s, s * 1.1, s * 1.8, 8);
       ctx.fill();
-      ctx.fillStyle = this.def.color2;
+      // Highlight stripe
+      ctx.fillStyle = 'rgba(255,255,255,0.13)';
       ctx.beginPath();
-      ctx.arc(x, y - s, s * 0.42, 0, Math.PI * 2);
+      ctx.roundRect(x - s * 0.4, y - s + 4, s * 0.28, s * 1.2, 4);
+      ctx.fill();
+      // Warning band
+      ctx.globalAlpha = 0.38;
+      ctx.fillStyle = '#f1c40f';
+      ctx.fillRect(x - s * 0.55, y + s * 0.42, s * 1.1, s * 0.2);
+      ctx.globalAlpha = 1;
+      // Head nozzle (gradient sphere)
+      const headGrd = ctx.createRadialGradient(x - s * 0.1, y - s - s * 0.1, 0, x, y - s, s * 0.44);
+      headGrd.addColorStop(0, '#4cdd88');
+      headGrd.addColorStop(1, '#1a7040');
+      ctx.fillStyle = headGrd;
+      ctx.beginPath();
+      ctx.arc(x, y - s, s * 0.44, 0, Math.PI * 2);
+      ctx.fill();
+      // Eye highlight on head
+      ctx.fillStyle = 'rgba(180,255,180,0.45)';
+      ctx.beginPath();
+      ctx.arc(x - s * 0.12, y - s - s * 0.14, s * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+      // Side gas nozzle pipe
+      ctx.strokeStyle = '#115530';
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.42, y - s * 0.38);
+      ctx.lineTo(x + s * 0.78, y - s * 0.72);
+      ctx.stroke();
+      const nozzleGrd = ctx.createRadialGradient(x + s * 0.78, y - s * 0.72, 0, x + s * 0.78, y - s * 0.72, 5);
+      nozzleGrd.addColorStop(0, '#4cdd88');
+      nozzleGrd.addColorStop(1, '#1a7040');
+      ctx.fillStyle = nozzleGrd;
+      ctx.beginPath();
+      ctx.arc(x + s * 0.78, y - s * 0.72, 5, 0, Math.PI * 2);
       ctx.fill();
 
     } else if (this.type === 'blaster') {
+      // Explosive shell launcher — orange barrel
+      const bodyGrd = ctx.createLinearGradient(x - s * 0.6, 0, x + s * 0.6, 0);
+      bodyGrd.addColorStop(0, '#a84500');
+      bodyGrd.addColorStop(0.4, '#e67e22');
+      bodyGrd.addColorStop(1, '#7a3000');
+      ctx.fillStyle = bodyGrd;
       ctx.beginPath();
-      ctx.roundRect(x - s * 0.6, y - s * 0.9, s * 1.2, s * 1.7, 6);
+      ctx.roundRect(x - s * 0.6, y - s * 0.9, s * 1.2, s * 1.7, 7);
       ctx.fill();
-      ctx.fillStyle = '#333';
+      // Highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
       ctx.beginPath();
-      ctx.arc(x, y - s * 0.9, s * 0.52, 0, Math.PI * 2);
+      ctx.roundRect(x - s * 0.44, y - s * 0.8, s * 0.28, s * 1.1, 4);
       ctx.fill();
-      ctx.fillStyle = this.def.color2;
+      // Danger stripes
+      ctx.globalAlpha = 0.38;
+      ctx.fillStyle = '#e74c3c';
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(x - s * 0.6, y - s * 0.08 + i * s * 0.33, s * 1.2, s * 0.13);
+      }
+      ctx.globalAlpha = 1;
+      // Barrel cap
+      const capGrd = ctx.createRadialGradient(x - s * 0.1, y - s * 0.9 - s * 0.14, 0, x, y - s * 0.9, s * 0.54);
+      capGrd.addColorStop(0, '#505050');
+      capGrd.addColorStop(1, '#1a1a1a');
+      ctx.fillStyle = capGrd;
       ctx.beginPath();
-      ctx.arc(x, y - s * 0.9, s * 0.3, 0, Math.PI * 2);
+      ctx.arc(x, y - s * 0.9, s * 0.54, 0, Math.PI * 2);
       ctx.fill();
+      const innerGrd = ctx.createRadialGradient(x - s * 0.08, y - s * 0.9 - s * 0.08, 0, x, y - s * 0.9, s * 0.32);
+      innerGrd.addColorStop(0, '#f39c12');
+      innerGrd.addColorStop(1, '#d35400');
+      ctx.fillStyle = innerGrd;
+      ctx.beginPath();
+      ctx.arc(x, y - s * 0.9, s * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+      // Fuse wire
+      ctx.strokeStyle = '#8a4800';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.28, y - s * 0.58);
+      ctx.bezierCurveTo(x + s * 0.52, y - s * 0.86, x + s * 0.66, y - s * 0.48, x + s * 0.56, y - s * 0.18);
+      ctx.stroke();
+      // Spark at fuse tip
+      if (this.flashTimer > 0) {
+        const sparkGrd = ctx.createRadialGradient(x + s * 0.56, y - s * 0.18, 0, x + s * 0.56, y - s * 0.18, 6);
+        sparkGrd.addColorStop(0, '#fff');
+        sparkGrd.addColorStop(0.4, '#f1c40f');
+        sparkGrd.addColorStop(1, 'rgba(230,126,34,0)');
+        ctx.fillStyle = sparkGrd;
+        ctx.beginPath();
+        ctx.arc(x + s * 0.56, y - s * 0.18, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
     } else if (this.type === 'honker') {
-      // Tall horn
+      // Long-range sniper horn tower — blue hexagonal
+      const bodyGrd = ctx.createLinearGradient(x - s * 0.5, 0, x + s * 0.5, 0);
+      bodyGrd.addColorStop(0, '#1a5a8e');
+      bodyGrd.addColorStop(0.4, '#2980b9');
+      bodyGrd.addColorStop(1, '#0e3a5a');
+      ctx.fillStyle = bodyGrd;
       ctx.beginPath();
       ctx.moveTo(x - s * 0.35, y + s * 0.8);
       ctx.lineTo(x + s * 0.35, y + s * 0.8);
@@ -158,37 +254,112 @@ class Tower {
       ctx.lineTo(x - s * 0.5,  y - s * 0.4);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = this.def.color2;
+      // Highlight facet
+      ctx.fillStyle = 'rgba(255,255,255,0.10)';
       ctx.beginPath();
-      ctx.arc(x, y - s * 1.12, s * 0.3, 0, Math.PI * 2);
+      ctx.moveTo(x - s * 0.22, y + s * 0.62);
+      ctx.lineTo(x - s * 0.06, y + s * 0.62);
+      ctx.lineTo(x - s * 0.22, y - s * 0.92);
+      ctx.closePath();
       ctx.fill();
+      // Scope sphere
+      const scopeGrd = ctx.createRadialGradient(x - s * 0.1, y - s * 1.12 - s * 0.1, 0, x, y - s * 1.12, s * 0.32);
+      scopeGrd.addColorStop(0, '#5ab8ff');
+      scopeGrd.addColorStop(1, '#1a5a8e');
+      ctx.fillStyle = scopeGrd;
+      ctx.beginPath();
+      ctx.arc(x, y - s * 1.12, s * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+      // Cross-hair lines on scope
+      ctx.strokeStyle = '#a8d8ff';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.24, y - s * 1.12); ctx.lineTo(x + s * 0.24, y - s * 1.12);
+      ctx.moveTo(x, y - s * 1.36);             ctx.lineTo(x, y - s * 0.88);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      // Barrel tube
+      ctx.strokeStyle = '#0e3a5a';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.44, y - s * 0.28);
+      ctx.lineTo(x + s * 0.88, y - s * 0.64);
+      ctx.stroke();
+      ctx.strokeStyle = '#3498db';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(x + s * 0.44, y - s * 0.28);
+      ctx.lineTo(x + s * 0.88, y - s * 0.64);
+      ctx.stroke();
 
     } else if (this.type === 'fogger') {
-      // Chunky rounded canister
+      // Gas canister — purple with tubes and vents
+      const bodyGrd = ctx.createLinearGradient(x - s * 0.62, 0, x + s * 0.62, 0);
+      bodyGrd.addColorStop(0, '#5a1a7e');
+      bodyGrd.addColorStop(0.4, '#8e44ad');
+      bodyGrd.addColorStop(1, '#3a0a5e');
+      ctx.fillStyle = bodyGrd;
       ctx.beginPath();
       ctx.roundRect(x - s * 0.62, y - s * 0.85, s * 1.24, s * 1.65, 12);
       ctx.fill();
-      // Vents
-      ctx.strokeStyle = this.def.color2;
-      ctx.lineWidth = 2;
+      // Highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.48, y - s * 0.75, s * 0.28, s * 1.1, 6);
+      ctx.fill();
+      // Glowing vents
       for (let i = 0; i < 3; i++) {
+        const vy = y - s * 0.3 + i * s * 0.28;
+        ctx.strokeStyle = this.def.color2;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(x - s * 0.45, y - s * 0.3 + i * s * 0.28);
-        ctx.lineTo(x + s * 0.45, y - s * 0.3 + i * s * 0.28);
+        ctx.moveTo(x - s * 0.44, vy);
+        ctx.lineTo(x + s * 0.44, vy);
         ctx.stroke();
+        const ventGrd = ctx.createLinearGradient(x - s * 0.44, 0, x + s * 0.44, 0);
+        ventGrd.addColorStop(0, 'rgba(155,89,182,0)');
+        ventGrd.addColorStop(0.5, 'rgba(155,89,182,0.28)');
+        ventGrd.addColorStop(1, 'rgba(155,89,182,0)');
+        ctx.fillStyle = ventGrd;
+        ctx.fillRect(x - s * 0.44, vy - 2, s * 0.88, 4);
       }
       // Nozzle top
-      ctx.fillStyle = this.def.color2;
+      const nozzleGrd = ctx.createRadialGradient(x - s * 0.08, y - s * 0.85 - s * 0.1, 0, x, y - s * 0.85, s * 0.37);
+      nozzleGrd.addColorStop(0, '#c07ee0');
+      nozzleGrd.addColorStop(1, '#5a1a7e');
+      ctx.fillStyle = nozzleGrd;
       ctx.beginPath();
-      ctx.arc(x, y - s * 0.85, s * 0.35, 0, Math.PI * 2);
+      ctx.arc(x, y - s * 0.85, s * 0.37, 0, Math.PI * 2);
       ctx.fill();
+      // Gas tube coiling out
+      ctx.strokeStyle = '#3a0a5e';
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.55, y - s * 0.2);
+      ctx.bezierCurveTo(x - s * 0.95, y - s * 0.2, x - s * 0.95, y + s * 0.42, x - s * 0.62, y + s * 0.42);
+      ctx.stroke();
+      ctx.strokeStyle = '#7a3a9e';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.55, y - s * 0.2);
+      ctx.bezierCurveTo(x - s * 0.95, y - s * 0.2, x - s * 0.95, y + s * 0.42, x - s * 0.62, y + s * 0.42);
+      ctx.stroke();
     }
 
-    // Level pips
+    // ── Level pips (★ at L2, red ● at L3/max) ────────────────────────────
     for (let i = 0; i < this.level; i++) {
-      ctx.fillStyle = '#f1c40f';
+      const px = x - (this.level - 1) * 5 + i * 10;
+      const py = y + s * 0.56;
+      const pipColor = this.level === 3 ? '#e74c3c' : '#f1c40f';
+      const pipGrd = ctx.createRadialGradient(px - 1, py - 1, 0, px, py, 4.5);
+      pipGrd.addColorStop(0, this.level === 3 ? '#ff8888' : '#fff8aa');
+      pipGrd.addColorStop(1, pipColor);
+      ctx.fillStyle = pipGrd;
       ctx.beginPath();
-      ctx.arc(x - (this.level - 1) * 5 + i * 10, y + s * 0.52, 3.5, 0, Math.PI * 2);
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
       ctx.fill();
     }
 

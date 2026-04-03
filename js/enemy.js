@@ -128,51 +128,122 @@ class Enemy {
     const s = this.size;
     const x = this.x, y = this.y;
 
-    // Slow aura
+    // ── Slow/poison aura ──────────────────────────────────────────────────
     if (this.slowTimer > 0) {
-      ctx.globalAlpha = alpha * 0.45;
-      ctx.fillStyle = '#27ae60';
+      const auraGrd = ctx.createRadialGradient(x, y, s * 0.4, x, y, s + 9);
+      auraGrd.addColorStop(0, 'rgba(39,174,96,0)');
+      auraGrd.addColorStop(1, 'rgba(39,174,96,0.50)');
+      ctx.globalAlpha = alpha * 0.65;
+      ctx.fillStyle = auraGrd;
       ctx.beginPath();
-      ctx.arc(x, y, s + 5, 0, Math.PI * 2);
+      ctx.arc(x, y, s + 9, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = alpha;
     }
 
-    // Body
-    ctx.fillStyle = this.color;
+    // ── Body (gradient) ───────────────────────────────────────────────────
+    const bodyGrd = ctx.createRadialGradient(x - s * 0.22, y - s * 0.22, 0, x, y, s);
+    bodyGrd.addColorStop(0, this._lightenColor(this.color, 45));
+    bodyGrd.addColorStop(1, this._darkenColor(this.color, 35));
+    ctx.fillStyle = bodyGrd;
     ctx.beginPath();
     ctx.ellipse(x, y, s * 0.72, s * 0.88, 0, 0, Math.PI * 2);
     ctx.fill();
+    // Outline
+    ctx.strokeStyle = this._darkenColor(this.color, 55);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
-    // Eyes
+    // ── Fur texture strokes ───────────────────────────────────────────────
+    ctx.globalAlpha = alpha * 0.18;
+    ctx.strokeStyle = this._darkenColor(this.color, 25);
+    ctx.lineWidth = 0.9;
+    ctx.lineCap = 'round';
+    for (let fi = 0; fi < 4; fi++) {
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.5 + fi * s * 0.32, y - s * 0.58);
+      ctx.lineTo(x - s * 0.54 + fi * s * 0.32, y + s * 0.5);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = alpha;
+
+    // ── Snout / nose ──────────────────────────────────────────────────────
+    ctx.fillStyle = this._darkenColor(this.color, 18);
+    ctx.beginPath();
+    ctx.ellipse(x, y + s * 0.2, s * 0.32, s * 0.24, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#c85858';
+    ctx.beginPath();
+    ctx.ellipse(x, y + s * 0.3, s * 0.15, s * 0.10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#882020';
+    ctx.beginPath(); ctx.arc(x - s * 0.07, y + s * 0.32, s * 0.038, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + s * 0.07, y + s * 0.32, s * 0.038, 0, Math.PI * 2); ctx.fill();
+
+    // ── Eyes ──────────────────────────────────────────────────────────────
     ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.ellipse(x - s * 0.22, y - s * 0.16, s * 0.19, s * 0.19, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x + s * 0.22, y - s * 0.16, s * 0.19, s * 0.19, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#111';
     ctx.beginPath(); ctx.ellipse(x - s * 0.19, y - s * 0.16, s * 0.10, s * 0.10, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x + s * 0.25, y - s * 0.16, s * 0.10, s * 0.10, 0, 0, Math.PI * 2); ctx.fill();
+    // Eye shine
+    ctx.fillStyle = 'rgba(255,255,255,0.72)';
+    ctx.beginPath(); ctx.arc(x - s * 0.25, y - s * 0.22, s * 0.055, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + s * 0.19, y - s * 0.22, s * 0.055, 0, Math.PI * 2); ctx.fill();
 
-    // Ninja headband
-    const bandColor = this.type === 'tank' ? '#aaa' : (this.type === 'boss' ? '#e74c3c' : '#c0392b');
-    ctx.fillStyle = bandColor;
+    // ── Ninja headband ────────────────────────────────────────────────────
+    const bandBase = this.type === 'tank' ? '#7a7a7a' : (this.type === 'boss' ? '#c0392b' : '#8B0000');
+    const bandGrd  = ctx.createLinearGradient(x - s * 0.74, y - s * 0.36, x - s * 0.74, y - s * 0.14);
+    bandGrd.addColorStop(0, bandBase);
+    bandGrd.addColorStop(0.45, this._lightenColor(bandBase, 28));
+    bandGrd.addColorStop(1, bandBase);
+    ctx.fillStyle = bandGrd;
     ctx.fillRect(x - s * 0.74, y - s * 0.36, s * 1.48, s * 0.22);
+    // Knot tails
+    ctx.fillStyle = bandBase;
+    ctx.beginPath();
+    ctx.moveTo(x + s * 0.74, y - s * 0.3);
+    ctx.lineTo(x + s * 0.96, y - s * 0.48);
+    ctx.lineTo(x + s * 0.96, y - s * 0.14);
+    ctx.closePath();
+    ctx.fill();
 
-    // Legs (walk anim)
+    // ── Legs (walk anim) ──────────────────────────────────────────────────
     const legOff = (this.walkFrame % 2 === 0) ? 3 : -3;
-    ctx.fillStyle = '#5D4037';
-    ctx.beginPath(); ctx.ellipse(x - s * 0.42, y + s * 0.72 + legOff, s * 0.22, s * 0.26, -0.2, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x + s * 0.42, y + s * 0.72 - legOff, s * 0.22, s * 0.26,  0.2, 0, Math.PI * 2); ctx.fill();
+    ['left', 'right'].forEach((side, si) => {
+      const lx = x + (si === 0 ? -s * 0.42 : s * 0.42);
+      const ly = y + s * 0.72 + (si === 0 ? legOff : -legOff);
+      const lg = ctx.createRadialGradient(lx, ly, 0, lx, ly, s * 0.28);
+      lg.addColorStop(0, '#7a5a47');
+      lg.addColorStop(1, '#3a2820');
+      ctx.fillStyle = lg;
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, s * 0.22, s * 0.26, si === 0 ? -0.2 : 0.2, 0, Math.PI * 2);
+      ctx.fill();
+    });
 
-    // Tank armour plate
+    // ── Tank armour plate ─────────────────────────────────────────────────
     if (this.type === 'tank') {
-      ctx.strokeStyle = '#aaa';
+      ctx.strokeStyle = '#b0b0b0';
       ctx.lineWidth = 3;
       ctx.strokeRect(x - s * 0.56, y - s * 0.42, s * 1.12, s * 0.92);
+      // Rivets
+      ctx.fillStyle = '#909090';
+      for (const [rx, ry] of [[-0.5, -0.4], [0.5, -0.4], [-0.5, 0.4], [0.5, 0.4]]) {
+        ctx.beginPath();
+        ctx.arc(x + s * rx * 0.93, y + s * ry * 0.84, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
-    // Boss crown
+    // ── Boss crown ────────────────────────────────────────────────────────
     if (this.type === 'boss') {
-      ctx.fillStyle = '#f1c40f';
+      const crownGrd = ctx.createLinearGradient(0, y - s * 1.32, 0, y - s * 0.82);
+      crownGrd.addColorStop(0, '#f1c40f');
+      crownGrd.addColorStop(0.5, '#e8b800');
+      crownGrd.addColorStop(1, '#c89800');
+      ctx.fillStyle = crownGrd;
       ctx.beginPath();
       ctx.moveTo(x - s * 0.5,  y - s * 0.82);
       ctx.lineTo(x - s * 0.5,  y - s * 1.22);
@@ -183,30 +254,84 @@ class Enemy {
       ctx.lineTo(x + s * 0.5,  y - s * 0.82);
       ctx.closePath();
       ctx.fill();
+      ctx.strokeStyle = '#d4a000';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      // Crown ruby
+      const rubyGrd = ctx.createRadialGradient(x - s * 0.04, y - s * 1.28 - s * 0.03, 0, x, y - s * 1.28, s * 0.11);
+      rubyGrd.addColorStop(0, '#ff8888');
+      rubyGrd.addColorStop(1, '#c0392b');
+      ctx.fillStyle = rubyGrd;
+      ctx.beginPath();
+      ctx.arc(x, y - s * 1.28, s * 0.11, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // Swarm antennas
+    // ── Swarm antennas ────────────────────────────────────────────────────
     if (this.type === 'swarm') {
-      ctx.strokeStyle = this.color;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = this._lightenColor(this.color, 22);
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.moveTo(x - s * 0.2, y - s * 0.8);
-      ctx.lineTo(x - s * 0.35, y - s * 1.3);
+      ctx.lineTo(x - s * 0.36, y - s * 1.32);
       ctx.moveTo(x + s * 0.2, y - s * 0.8);
-      ctx.lineTo(x + s * 0.35, y - s * 1.3);
+      ctx.lineTo(x + s * 0.36, y - s * 1.32);
       ctx.stroke();
+      ctx.fillStyle = this._lightenColor(this.color, 40);
+      ctx.beginPath(); ctx.arc(x - s * 0.36, y - s * 1.32, 2.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + s * 0.36, y - s * 1.32, 2.8, 0, Math.PI * 2); ctx.fill();
     }
 
-    // HP bar
+    // ── Stealth shimmer ───────────────────────────────────────────────────
+    if (this.isStealthy) {
+      ctx.globalAlpha = alpha * 0.32;
+      ctx.strokeStyle = '#cc77ff';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(x, y, s * 0.82, s * 0.98, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = alpha;
+    }
+
+    // ── HP bar (gradient) ─────────────────────────────────────────────────
     ctx.globalAlpha = 1;
     const bw = s * 1.9, bh = 5;
     const bx = x - bw / 2, by = y - s - 16;
-    ctx.fillStyle = '#222';
-    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
     const pct = Math.max(0, this.hp / this.maxHp);
-    ctx.fillStyle = pct > 0.5 ? '#2ecc71' : (pct > 0.25 ? '#f39c12' : '#e74c3c');
+    const barBase = pct > 0.5 ? '#2ecc71' : (pct > 0.25 ? '#f39c12' : '#e74c3c');
+    const barGrd = ctx.createLinearGradient(bx, by, bx, by + bh);
+    barGrd.addColorStop(0, barBase);
+    barGrd.addColorStop(1, this._darkenColor(barBase, 35));
+    ctx.fillStyle = '#282828';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = barGrd;
     ctx.fillRect(bx, by, bw * pct, bh);
+    // Bar shine
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(bx, by, bw * pct, bh / 2);
 
     ctx.restore();
+  }
+
+  _lightenColor(hex, amt) {
+    const clean = hex.replace('#', '');
+    if (clean.length !== 6) return hex;
+    const n = parseInt(clean, 16);
+    const r = Math.min(255, (n >> 16) + amt);
+    const g = Math.min(255, ((n >> 8) & 0xFF) + amt);
+    const b = Math.min(255, (n & 0xFF) + amt);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  _darkenColor(hex, amt) {
+    const clean = hex.replace('#', '');
+    if (clean.length !== 6) return hex;
+    const n = parseInt(clean, 16);
+    const r = Math.max(0, (n >> 16) - amt);
+    const g = Math.max(0, ((n >> 8) & 0xFF) - amt);
+    const b = Math.max(0, (n & 0xFF) - amt);
+    return `rgb(${r},${g},${b})`;
   }
 }
