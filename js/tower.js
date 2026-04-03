@@ -42,8 +42,8 @@ class Tower {
     if (this.barDropAnim > 0) this.barDropAnim = Math.max(0, this.barDropAnim - dt / CRUSHER_SLAM_MS);
     if (this.attackAnim  > 0) this.attackAnim  = Math.max(0, this.attackAnim  - dt / ATTACK_ANIM_MS);
 
-    if (this.def.effect === 'cloud') {
-      // Crusher: damage every enemy in range on a timer (no projectile)
+    if (this.def.effect === 'cloud' || this.def.effect === 'superblast') {
+      // Area damage every enemy in range on a timer (no projectile)
       this.cloudTimer += dt;
       if (this.cloudTimer >= this.fireRate) {
         this.cloudTimer = 0;
@@ -51,7 +51,7 @@ class Tower {
         for (const e of game.enemies) {
           if (e.dead || e.reached) continue;
           if (Math.hypot(e.x - this.x, e.y - this.y) <= this.range) {
-            e.takeDamage(this.damage, 'cloud');
+            e.takeDamage(this.damage, this.def.effect);
             hit = true;
           }
         }
@@ -60,7 +60,11 @@ class Tower {
           this.barDropAnim = 1;
           this.attackAnim  = 1;
           playSound(this.def.sound);
-          spawnFartCloudSlam(this.x, this.y, this.range);
+          if (this.def.effect === 'superblast') {
+            spawnSuperBlast(this.x, this.y, this.range);
+          } else {
+            spawnFartCloudSlam(this.x, this.y, this.range);
+          }
         }
       }
     } else {
@@ -143,8 +147,40 @@ class Tower {
       ctx.restore();
     }
 
-    // ── Fart flash ring when firing (non-fogger towers) ─────────────────
-    if (this.flashTimer > 0 && this.type !== 'fogger') {
+    // ── Superblast: cyan charge-up shockwave aura ─────────────────────────
+    if (this.type === 'superblast') {
+      const chargeProgress = this.cloudTimer / this.fireRate;
+      const pulse = 0.5 + 0.5 * Math.sin(this.ringAnim * 3);
+      ctx.save();
+      const auraRadius = this.range * (0.25 + 0.55 * chargeProgress);
+      const auraGrd = ctx.createRadialGradient(x, y, 0, x, y, auraRadius);
+      auraGrd.addColorStop(0, '#00ccff00');
+      auraGrd.addColorStop(0.6, '#00ccff' + Math.round(chargeProgress * 0x40).toString(16).padStart(2, '0'));
+      auraGrd.addColorStop(1, '#88eeff00');
+      ctx.globalAlpha = 0.45 + 0.3 * pulse * chargeProgress;
+      ctx.fillStyle = auraGrd;
+      ctx.beginPath();
+      ctx.arc(x, y, auraRadius, 0, Math.PI * 2);
+      ctx.fill();
+      if (chargeProgress > 0.6) {
+        ctx.shadowColor = '#00eeff';
+        ctx.shadowBlur  = 8;
+        ctx.strokeStyle = '#00ccff';
+        ctx.lineWidth   = 1.5;
+        ctx.globalAlpha = (chargeProgress - 0.6) * 2.5 * 0.8;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(x, y, this.range * chargeProgress, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.shadowBlur  = 0;
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // ── Fart flash ring when firing (non-fogger, non-superblast towers) ─────
+    if (this.flashTimer > 0 && this.type !== 'fogger' && this.type !== 'superblast') {
       ctx.save();
       const prog = this.flashTimer / 150;
       // Each tower has a themed fart-burst color
@@ -649,6 +685,125 @@ class Tower {
       ctx.textBaseline = 'middle';
       ctx.fillText('☣', x, y - s * 0.6);
       ctx.restore();
+    } else if (this.type === 'superblast') {
+      // ── Toilet Brush — gleaming handle + cyan bristle fan ─────────────────
+
+      // Handle (long white/light-blue plastic rod)
+      const handleGrd = ctx.createLinearGradient(x - s * 0.1, 0, x + s * 0.1, 0);
+      handleGrd.addColorStop(0, '#7ab8cc');
+      handleGrd.addColorStop(0.35, '#ffffff');
+      handleGrd.addColorStop(1, '#5a9ab0');
+      ctx.fillStyle = handleGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.1, y - s * 0.5, s * 0.2, s * 1.3, 4);
+      ctx.fill();
+      // Handle bottom cap
+      ctx.fillStyle = '#5a9ab0';
+      ctx.beginPath();
+      ctx.ellipse(x, y + s * 0.8, s * 0.1, s * 0.055, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Collar / ferrule (chrome band between handle and bristle head)
+      const collarGrd = ctx.createLinearGradient(x - s * 0.2, 0, x + s * 0.2, 0);
+      collarGrd.addColorStop(0, '#778899');
+      collarGrd.addColorStop(0.4, '#ddeeff');
+      collarGrd.addColorStop(1, '#556677');
+      ctx.fillStyle = collarGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.18, y - s * 0.62, s * 0.36, s * 0.16, 3);
+      ctx.fill();
+
+      // Bristle head center disc
+      const headCy = y - s * 0.88;
+      const headGrd = ctx.createRadialGradient(x - s * 0.08, headCy - s * 0.06, 0, x, headCy, s * 0.32);
+      headGrd.addColorStop(0, '#ffffff');
+      headGrd.addColorStop(0.5, '#aaddff');
+      headGrd.addColorStop(1, '#0088cc');
+      ctx.fillStyle = headGrd;
+      ctx.beginPath();
+      ctx.arc(x, headCy, s * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bristles — lines radiating outward from the head in all directions
+      const bristleCount = 18;
+      for (let i = 0; i < bristleCount; i++) {
+        const angle = (i / bristleCount) * Math.PI * 2;
+        const innerR = s * 0.28;
+        const outerR = s * (0.68 + Math.sin(this.ringAnim * 2 + i * 0.9) * 0.05);
+        const bx0 = x + Math.cos(angle) * innerR;
+        const by0 = headCy + Math.sin(angle) * innerR;
+        const bx1 = x + Math.cos(angle) * outerR;
+        const by1 = headCy + Math.sin(angle) * outerR;
+        const bGrd = ctx.createLinearGradient(bx0, by0, bx1, by1);
+        bGrd.addColorStop(0, '#aaddff');
+        bGrd.addColorStop(1, '#00eeff');
+        ctx.strokeStyle = bGrd;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(bx0, by0);
+        ctx.lineTo(bx1, by1);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Cyan glow ring around bristle head
+      ctx.shadowColor = '#00ccff';
+      ctx.shadowBlur  = 14;
+      ctx.strokeStyle = '#00ccff';
+      ctx.lineWidth   = 1.5;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.arc(x, headCy, s * 0.72, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowBlur  = 0;
+      ctx.globalAlpha = 1;
+
+      // Animated spray droplets orbiting the bristle head
+      ctx.fillStyle = '#00eeff';
+      ctx.globalAlpha = 0.65;
+      for (let i = 0; i < 5; i++) {
+        const ang = this.ringAnim * 1.2 + i * (Math.PI * 2 / 5);
+        const dist = s * (0.88 + Math.sin(this.ringAnim * 2.5 + i * 1.3) * 0.1);
+        ctx.beginPath();
+        ctx.arc(
+          x + Math.cos(ang) * dist,
+          headCy + Math.sin(ang) * dist,
+          1.8 + Math.sin(this.ringAnim * 3 + i * 1.8) * 0.7,
+          0, Math.PI * 2
+        );
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Attack animation: expanding cyan shockwave rings
+      if (this.attackAnim > 0) {
+        const prog = this.attackAnim;
+        ctx.save();
+        for (let ring = 0; ring < 3; ring++) {
+          const ringProg = Math.min(1, (1 - prog) * 2.2 + ring * 0.3);
+          const ringR = s * (0.9 + 3.8 * ringProg);
+          const ringAlpha = Math.max(0, prog - ring * 0.28) * 0.75;
+          const shockGrd = ctx.createRadialGradient(x, headCy, ringR * 0.35, x, headCy, ringR);
+          shockGrd.addColorStop(0, `rgba(0,220,255,${ringAlpha * 0.45})`);
+          shockGrd.addColorStop(0.6, `rgba(0,150,220,${ringAlpha * 0.2})`);
+          shockGrd.addColorStop(1, 'rgba(0,100,180,0)');
+          ctx.fillStyle = shockGrd;
+          ctx.beginPath();
+          ctx.arc(x, headCy, ringR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = prog * 0.9;
+        ctx.shadowColor = '#00eeff';
+        ctx.shadowBlur  = 22;
+        ctx.strokeStyle = '#00ccff';
+        ctx.lineWidth   = 2.5 * prog;
+        ctx.beginPath();
+        ctx.arc(x, headCy, s * (1.1 + 3.2 * (1 - prog)), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur  = 0;
+        ctx.restore();
+      }
     }
 
     // ── Gas slam animation (Fogger only) ─────────────────────────────────
@@ -695,6 +850,48 @@ class Tower {
         aGrd.addColorStop(0, `rgba(150,255,0,${ap * 0.5})`);
         aGrd.addColorStop(0.6, `rgba(80,200,0,${ap * 0.25})`);
         aGrd.addColorStop(1, 'rgba(40,120,0,0)');
+        ctx.fillStyle = aGrd;
+        ctx.beginPath();
+        ctx.arc(x, y, aR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur  = 0;
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // ── Super blast shockwave animation (Superblast only) ────────────────
+    if (this.type === 'superblast' && this.barDropAnim > 0) {
+      ctx.save();
+      const prog      = this.barDropAnim;
+      const flashPhase = Math.max(0, (1 - prog) * 2 - 1);
+      if (flashPhase > 0) {
+        const ringAlpha = 0.9 * (1 - flashPhase);
+        const ringR     = this.range * (0.45 + 0.85 * flashPhase);
+        ctx.globalAlpha = ringAlpha;
+        ctx.shadowColor = '#00eeff';
+        ctx.shadowBlur  = 24;
+        ctx.strokeStyle = '#00ccff';
+        ctx.lineWidth   = 4 * (1 - flashPhase) + 0.5;
+        ctx.beginPath();
+        ctx.arc(x, y, ringR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = ringAlpha * 0.55;
+        ctx.strokeStyle = '#88eeff';
+        ctx.lineWidth   = 2 * (1 - flashPhase);
+        ctx.beginPath();
+        ctx.arc(x, y, ringR * 0.65, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      // Expanding cyan cloud around tower
+      if (this.attackAnim > 0) {
+        const ap = this.attackAnim;
+        const aR = this.range * (0.5 + 0.7 * (1 - ap));
+        ctx.globalAlpha = ap * 0.45;
+        const aGrd = ctx.createRadialGradient(x, y, 0, x, y, aR);
+        aGrd.addColorStop(0, `rgba(0,220,255,${ap * 0.5})`);
+        aGrd.addColorStop(0.6, `rgba(0,150,200,${ap * 0.25})`);
+        aGrd.addColorStop(1, 'rgba(0,100,180,0)');
         ctx.fillStyle = aGrd;
         ctx.beginPath();
         ctx.arc(x, y, aR, 0, Math.PI * 2);

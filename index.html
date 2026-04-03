@@ -29,7 +29,7 @@
     <div class="stat-row"><span>💀 Kills</span><span class="stat-val" id="statKills">0</span></div>
     <div class="stat-row"><span>👾 Enemies</span><span class="stat-val" id="statEnemies">0</span></div>
 
-    <div style="color:#aaa;font-size:11px;margin-top:2px;">Select Tower (or press 1–4):</div>
+    <div style="color:#aaa;font-size:11px;margin-top:2px;">Select Tower (or press 1–5):</div>
     <div id="towerButtons">
       <button class="tower-btn" data-type="stinker">
         <div class="tname">🟢 Stench Lord</div>
@@ -50,6 +50,11 @@
         <div class="tname">🔩 Sewer Gas</div>
         <div>Toxic cloud slams down · Area damage</div>
         <div class="tcost">110g · [4]</div>
+      </button>
+      <button class="tower-btn" data-type="superblast">
+        <div class="tname">🚿 Toilet Brush</div>
+        <div>Massive AOE blast · Hits ALL in range</div>
+        <div class="tcost">200g · [5]</div>
       </button>
     </div>
 
@@ -73,6 +78,7 @@
       <label>Fart Bomb:   <input type="file" accept="audio/*" id="audioBlaster"></label>
       <label>Toilet:      <input type="file" accept="audio/*" id="audioHonker"></label>
       <label>Sewer Gas:   <input type="file" accept="audio/*" id="audioFogger"></label>
+      <label>Toilet Brush: <input type="file" accept="audio/*" id="audioSuperblast"></label>
     </div>
   </div>
 </div>
@@ -88,7 +94,7 @@
     Place towers on the <strong style="color:#f5a623">🟡 glowing build pads</strong>.<br>
     Press <strong style="color:#1fa05a">Start Wave</strong> (or <kbd>Space</kbd>) to deploy defenses.<br>
     Right-click / <kbd>Esc</kbd> to cancel placement.<br>
-    Keys <kbd>1</kbd>–<kbd>4</kbd> select tower types · Click a tower to upgrade or sell.<br>
+    Keys <kbd>1</kbd>–<kbd>5</kbd> select tower types · Click a tower to upgrade or sell.<br>
     <span style="color:#00ffee">⚡ Tip: 💩 Toilet pierces every mole in a line — combo with 🟠 Fart Bomb for max carnage!</span>
   </div>
   <div style="display:flex;gap:14px;margin-top:22px;align-items:center;flex-wrap:wrap;justify-content:center;">
