@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME  – uses a unified logical (tile-space) coordinate system.
 //
-// All game objects live in 0..LOGICAL_W × 0..LOGICAL_H space (960 × 600).
+// All game objects live in 0..LOGICAL_W × 0..LOGICAL_H space (1200 × 780).
 // Before rendering, one ctx.scale(scaleX, scaleY) is applied so everything
 // draws correctly at any canvas size without per-object scaling arithmetic.
 // Mouse events convert canvas-px → logical-px via canvasToLogical().
@@ -52,6 +52,13 @@ class Game {
     const uiW = document.getElementById('ui').offsetWidth || 210;
     this.canvas.width  = Math.max(window.innerWidth  - uiW, 300);
     this.canvas.height = Math.max(window.innerHeight, 300);
+  }
+
+  regenerateMap() {
+    generateMap();
+    this.buildPads        = this._computeBuildPads();
+    this.manholePositions = this._computeManholePositions();
+    this._render();
   }
 
   _computeManholePositions() {
@@ -299,7 +306,7 @@ class Game {
             ctx.fillText('☣', x + TILE * 0.5, y + TILE * 0.5);
             ctx.restore();
           }
-          if (r === 9 && c % 5 === 3) {
+          if (r === ROWS - 1 && c % 5 === 3) {
             ctx.save();
             ctx.globalAlpha = 0.25;
             ctx.fillStyle = '#88aa00';
@@ -320,7 +327,7 @@ class Game {
           ctx.fillStyle = roadSheen;
           ctx.fillRect(x, y, TILE, TILE);
 
-          const isHoriz = (r === 3 || r === 4 || r === 6 || r === 7);
+          const isHoriz = (t === T_ROAD);
           if (isHoriz && r % 2 === 0) {
             // Yellow-green lane dash (stinky road markings)
             ctx.shadowColor = '#aacc00';

@@ -4,7 +4,7 @@
 
 const TOWER_DEFS = {
   stinker: {
-    name: 'Stinker', cost: 75, sellRatio: 0.6,
+    name: 'Stench Lord', cost: 75, sellRatio: 0.6,
     color: '#27ae60', color2: '#2ecc71',
     range: 110, damage: 6, fireRate: 1200,
     sound: 'stinker',
@@ -14,7 +14,7 @@ const TOWER_DEFS = {
     effect: 'slow',
   },
   blaster: {
-    name: 'Blaster', cost: 100, sellRatio: 0.6,
+    name: 'Fart Bomb', cost: 100, sellRatio: 0.6,
     color: '#e67e22', color2: '#f39c12',
     range: 85, damage: 28, fireRate: 2000,
     sound: 'blaster',
@@ -24,23 +24,23 @@ const TOWER_DEFS = {
     effect: 'aoe',
   },
   honker: {
-    name: 'Honker', cost: 125, sellRatio: 0.6,
-    color: '#2980b9', color2: '#3498db',
+    name: 'Toilet', cost: 125, sellRatio: 0.6,
+    color: '#8B4513', color2: '#a0522d',
     range: 150, damage: 16, fireRate: 850,
     sound: 'honker',
     upgradeCost: 100,
     upgradeDmg: 9, upgradeRange: 20, upgradeFireRate: -100,
-    desc: 'Pierces enemies · Sees stealth',
+    desc: 'Shoots poop · Pierces enemies · Sees stealth',
     effect: 'pierce',
   },
   fogger: {
-    name: 'Crusher', cost: 110, sellRatio: 0.6,
+    name: 'Sewer Gas', cost: 110, sellRatio: 0.6,
     color: '#5588cc', color2: '#88bbff',
     range: 95, damage: 9, fireRate: 900,
     sound: 'fogger',
     upgradeCost: 85,
     upgradeDmg: 5, upgradeRange: 15, upgradeFireRate: -120,
-    desc: 'Metal bar slams down · Hits all in range',
+    desc: 'Toxic cloud slams down · Hits all in range',
     effect: 'cloud',
   },
 };

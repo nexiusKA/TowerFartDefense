@@ -22,23 +22,23 @@
     <div style="color:#aaa;font-size:11px;margin-top:2px;">Select Tower (or press 1–4):</div>
     <div id="towerButtons">
       <button class="tower-btn" data-type="stinker">
-        <div class="tname">🟢 Stinker</div>
+        <div class="tname">🟢 Stench Lord</div>
         <div>Slows + poisons · Med range</div>
         <div class="tcost">75g · [1]</div>
       </button>
       <button class="tower-btn" data-type="blaster">
-        <div class="tname">🟠 Blaster</div>
+        <div class="tname">🟠 Fart Bomb</div>
         <div>AoE explosion · Short range</div>
         <div class="tcost">100g · [2]</div>
       </button>
       <button class="tower-btn" data-type="honker">
-        <div class="tname">🔵 Honker</div>
-        <div>Pierce · Long range · Sees stealth</div>
+        <div class="tname">💩 Toilet</div>
+        <div>Poop pierce · Long range · Sees stealth</div>
         <div class="tcost">125g · [3]</div>
       </button>
       <button class="tower-btn" data-type="fogger">
-        <div class="tname">🔩 Crusher</div>
-        <div>Metal bar slams down · Area damage</div>
+        <div class="tname">🔩 Sewer Gas</div>
+        <div>Toxic cloud slams down · Area damage</div>
         <div class="tcost">110g · [4]</div>
       </button>
     </div>
@@ -59,10 +59,10 @@
 
     <div id="audioSection">
       <div style="color:#ddd;font-size:11px;font-weight:bold;margin-bottom:4px;">🔊 Custom Sounds</div>
-      <label>Stinker: <input type="file" accept="audio/*" id="audioStinker"></label>
-      <label>Blaster: <input type="file" accept="audio/*" id="audioBlaster"></label>
-      <label>Honker:  <input type="file" accept="audio/*" id="audioHonker"></label>
-      <label>Crusher: <input type="file" accept="audio/*" id="audioFogger"></label>
+      <label>Stench Lord: <input type="file" accept="audio/*" id="audioStinker"></label>
+      <label>Fart Bomb:   <input type="file" accept="audio/*" id="audioBlaster"></label>
+      <label>Toilet:      <input type="file" accept="audio/*" id="audioHonker"></label>
+      <label>Sewer Gas:   <input type="file" accept="audio/*" id="audioFogger"></label>
     </div>
   </div>
 </div>
@@ -79,9 +79,13 @@
     Press <strong style="color:#1fa05a">Start Wave</strong> (or <kbd>Space</kbd>) to deploy defenses.<br>
     Right-click / <kbd>Esc</kbd> to cancel placement.<br>
     Keys <kbd>1</kbd>–<kbd>4</kbd> select tower types · Click a tower to upgrade or sell.<br>
-    <span style="color:#00ffee">⚡ Tip: Crushers stun whole clusters — combo with Blasters for max damage!</span>
+    <span style="color:#00ffee">⚡ Tip: 💩 Toilet pierces every mole in a line — combo with 🟠 Fart Bomb for max carnage!</span>
   </div>
-  <button id="btnStartGame">⚡ DEPLOY DEFENSES</button>
+  <div style="display:flex;gap:14px;margin-top:22px;align-items:center;flex-wrap:wrap;justify-content:center;">
+    <button id="btnGenerateMap">🎲 Generate Map</button>
+    <button id="btnStartGame">⚡ DEPLOY DEFENSES</button>
+  </div>
+  <div id="mapGenHint" style="font-size:12px;color:#00ffee88;margin-top:10px;min-height:18px;letter-spacing:1px;"></div>
 </div>
 
 <div id="msgBox"></div>

@@ -49,7 +49,7 @@ class Projectile {
         particles.push(new Particle(
           this.x + (Math.random() - 0.5) * 3,
           this.y + (Math.random() - 0.5) * 3,
-          Math.random() < 0.5 ? '#4dccff' : '#44ff88',
+          Math.random() < 0.5 ? '#8B4513' : '#6b3010',
           (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3,
           180, 2.5 + Math.random() * 2.5, 'gas'
         ));
@@ -195,10 +195,10 @@ class Projectile {
       ctx.stroke();
 
     } else if (this.def.effect === 'pierce') {
-      // ── Honker: elongated blue-green fart gas streak ──────────────────
+      // ── Toilet: brown poop blob streak ───────────────────────────────────
       const glowGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 16);
-      glowGrd.addColorStop(0, 'rgba(100,220,255,0.35)');
-      glowGrd.addColorStop(1, 'rgba(40,180,80,0)');
+      glowGrd.addColorStop(0, 'rgba(139,69,19,0.38)');
+      glowGrd.addColorStop(1, 'rgba(60,20,5,0)');
       ctx.fillStyle = glowGrd;
       ctx.beginPath();
       ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
@@ -208,44 +208,44 @@ class Projectile {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(Math.atan2(this.dir.y, this.dir.x));
-        // Elongated fart cloud along direction
+        // Elongated poop blob along travel direction
         const puffData = [
-          [12, 0, 7 + Math.sin(wp) * 1.3],
-          [0, 0, 6.5 + Math.cos(wp * 1.2) * 1],
-          [-10, Math.sin(wp * 0.9) * 2, 5.5 + Math.sin(wp * 0.8) * 0.9],
-          [-18, Math.sin(wp * 1.1) * 2.5, 4 + Math.cos(wp) * 0.7],
+          [11, 0, 6.5 + Math.sin(wp) * 1.2],
+          [0, Math.sin(wp * 0.9) * 1.5, 6 + Math.cos(wp * 1.1) * 0.9],
+          [-9, Math.sin(wp * 1.1) * 1.8, 5 + Math.sin(wp * 0.8) * 0.8],
+          [-17, Math.sin(wp * 0.8) * 2, 3.5 + Math.cos(wp) * 0.6],
         ];
         const puffCols = [
-          'rgba(100,220,255,0.7)',
-          'rgba(60,200,100,0.65)',
-          'rgba(80,200,180,0.55)',
-          'rgba(40,160,80,0.4)',
+          'rgba(139,69,19,0.85)',
+          'rgba(110,50,12,0.75)',
+          'rgba(90,38,8,0.65)',
+          'rgba(70,28,5,0.45)',
         ];
         for (let i = 0; i < 4; i++) {
           const [puffX, puffY, puffRadius] = puffData[i];
           const grd = ctx.createRadialGradient(puffX - puffRadius * 0.15, puffY - puffRadius * 0.15, 0, puffX, puffY, puffRadius);
-          grd.addColorStop(0, '#b8ffee');
+          grd.addColorStop(0, '#c07840');
           grd.addColorStop(0.5, puffCols[i]);
-          grd.addColorStop(1, 'rgba(40,180,80,0)');
+          grd.addColorStop(1, 'rgba(40,10,2,0)');
           ctx.fillStyle = grd;
           ctx.beginPath();
           ctx.arc(puffX, puffY, puffRadius, 0, Math.PI * 2);
           ctx.fill();
         }
-        // Central streak
-        const streakGrd = ctx.createLinearGradient(-18, 0, 14, 0);
-        streakGrd.addColorStop(0, 'rgba(40,180,120,0)');
-        streakGrd.addColorStop(0.6, 'rgba(120,240,200,0.5)');
-        streakGrd.addColorStop(1, '#b8ffee88');
+        // Central brown streak
+        const streakGrd = ctx.createLinearGradient(-17, 0, 13, 0);
+        streakGrd.addColorStop(0, 'rgba(60,20,5,0)');
+        streakGrd.addColorStop(0.5, 'rgba(139,69,19,0.55)');
+        streakGrd.addColorStop(1, '#c07840aa');
         ctx.fillStyle = streakGrd;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 16, 2.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 15, 2.2, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       } else {
         const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 7);
-        grd.addColorStop(0, '#b8ffeecc');
-        grd.addColorStop(1, '#3498db00');
+        grd.addColorStop(0, '#c07840cc');
+        grd.addColorStop(1, '#8B451300');
         ctx.fillStyle = grd;
         ctx.beginPath();
         ctx.arc(this.x, this.y, 7, 0, Math.PI * 2);

@@ -150,7 +150,7 @@ class Tower {
       // Each tower has a themed fart-burst color
       const flashCol = this.type === 'stinker' ? '#8dc829'
                      : this.type === 'blaster' ? '#c8a020'
-                     : '#4daaff';  // honker
+                     : '#8B4513';  // toilet (brown poop burst)
       const flashGrd = ctx.createRadialGradient(x, y, s, x, y, s + 14 + (1 - prog) * 22);
       flashGrd.addColorStop(0, flashCol + Math.min(255, Math.round(prog * 220)).toString(16).padStart(2, '0'));
       flashGrd.addColorStop(1, flashCol + '00');
@@ -405,121 +405,149 @@ class Tower {
       }
 
     } else if (this.type === 'honker') {
-      // Fart-horn sniper — blue body with a big trumpet horn on side
-      const bodyGrd = ctx.createLinearGradient(x - s * 0.5, 0, x + s * 0.5, 0);
-      bodyGrd.addColorStop(0, '#0d3d6e');
-      bodyGrd.addColorStop(0.4, '#1a5a8e');
-      bodyGrd.addColorStop(1, '#0a2a50');
-      ctx.fillStyle = bodyGrd;
+      // ── Toilet tower – porcelain throne that shoots smelly poop ──────────
+
+      // Water tank (back, upper part)
+      const tankGrd = ctx.createLinearGradient(x - s * 0.38, y - s * 1.3, x + s * 0.38, y - s * 0.55);
+      tankGrd.addColorStop(0, '#d4cfbe');
+      tankGrd.addColorStop(0.4, '#edeade');
+      tankGrd.addColorStop(1, '#b8b2a0');
+      ctx.fillStyle = tankGrd;
       ctx.beginPath();
-      ctx.moveTo(x - s * 0.35, y + s * 0.8);
-      ctx.lineTo(x + s * 0.35, y + s * 0.8);
-      ctx.lineTo(x + s * 0.5,  y - s * 0.4);
-      ctx.lineTo(x + s * 0.15, y - s * 1.12);
-      ctx.lineTo(x - s * 0.15, y - s * 1.12);
-      ctx.lineTo(x - s * 0.5,  y - s * 0.4);
+      ctx.roundRect(x - s * 0.38, y - s * 1.28, s * 0.76, s * 0.72, 6);
+      ctx.fill();
+      // Tank highlight sheen
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.32, y - s * 1.22, s * 0.2, s * 0.6, 4);
+      ctx.fill();
+      // Tank lid
+      const lidGrd = ctx.createLinearGradient(x - s * 0.42, y - s * 1.28, x + s * 0.42, y - s * 1.28);
+      lidGrd.addColorStop(0, '#c8c3b2');
+      lidGrd.addColorStop(0.5, '#f0ece0');
+      lidGrd.addColorStop(1, '#c8c3b2');
+      ctx.fillStyle = lidGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.42, y - s * 1.34, s * 0.84, s * 0.12, 5);
+      ctx.fill();
+      // Flush handle
+      ctx.fillStyle = '#a8a090';
+      ctx.beginPath();
+      ctx.roundRect(x + s * 0.3, y - s * 1.1, s * 0.14, s * 0.08, 2);
+      ctx.fill();
+      ctx.fillStyle = '#ccb820'; // gold handle
+      ctx.beginPath();
+      ctx.arc(x + s * 0.44, y - s * 1.06, s * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Toilet bowl body
+      const bowlGrd = ctx.createLinearGradient(x - s * 0.52, y - s * 0.55, x + s * 0.52, y + s * 0.75);
+      bowlGrd.addColorStop(0, '#dedad0');
+      bowlGrd.addColorStop(0.35, '#f0ece0');
+      bowlGrd.addColorStop(1, '#c0bba8');
+      ctx.fillStyle = bowlGrd;
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.5, y - s * 0.52);
+      ctx.lineTo(x - s * 0.52, y + s * 0.38);
+      ctx.bezierCurveTo(x - s * 0.52, y + s * 0.78, x + s * 0.52, y + s * 0.78, x + s * 0.52, y + s * 0.38);
+      ctx.lineTo(x + s * 0.5, y - s * 0.52);
       ctx.closePath();
       ctx.fill();
-      // Slime/mucus sheen
-      ctx.fillStyle = 'rgba(100,220,255,0.10)';
+      // Bowl inner sheen
+      ctx.fillStyle = 'rgba(255,255,255,0.16)';
       ctx.beginPath();
-      ctx.moveTo(x - s * 0.22, y + s * 0.62);
-      ctx.lineTo(x - s * 0.06, y + s * 0.62);
-      ctx.lineTo(x - s * 0.22, y - s * 0.92);
+      ctx.moveTo(x - s * 0.38, y - s * 0.44);
+      ctx.lineTo(x - s * 0.2, y - s * 0.44);
+      ctx.lineTo(x - s * 0.26, y + s * 0.32);
       ctx.closePath();
       ctx.fill();
-      // Green goo dripping from body
-      ctx.fillStyle = '#4dcc44';
-      ctx.globalAlpha = 0.5;
+
+      // Toilet seat (oval rim, open facing us)
+      ctx.strokeStyle = '#b8b2a0';
+      ctx.lineWidth = s * 0.08;
+      ctx.fillStyle = '#e8e4d4';
       ctx.beginPath();
-      ctx.moveTo(x + s * 0.28, y + s * 0.4);
-      ctx.bezierCurveTo(x + s * 0.38, y + s * 0.55, x + s * 0.42, y + s * 0.7, x + s * 0.36, y + s * 0.82);
-      ctx.bezierCurveTo(x + s * 0.28, y + s * 0.9, x + s * 0.22, y + s * 0.82, x + s * 0.26, y + s * 0.62);
-      ctx.closePath();
+      ctx.ellipse(x, y - s * 0.15, s * 0.44, s * 0.28, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.globalAlpha = 1;
-      // Big trumpet horn on the right
-      // Horn neck
-      ctx.strokeStyle = '#0e3a5a';
-      ctx.lineWidth = 6;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x + s * 0.44, y - s * 0.28);
-      ctx.lineTo(x + s * 0.88, y - s * 0.64);
+      ctx.strokeStyle = '#c8c3b2';
+      ctx.lineWidth = s * 0.05;
       ctx.stroke();
-      ctx.strokeStyle = '#3498db';
-      ctx.lineWidth = 3;
+
+      // Brown poop water inside bowl
+      const waterGrd = ctx.createRadialGradient(x, y - s * 0.12, 0, x, y - s * 0.12, s * 0.35);
+      waterGrd.addColorStop(0, '#5a2a10');
+      waterGrd.addColorStop(0.6, '#4a1e08');
+      waterGrd.addColorStop(1, '#2a0e04');
+      ctx.fillStyle = waterGrd;
       ctx.beginPath();
-      ctx.moveTo(x + s * 0.44, y - s * 0.28);
-      ctx.lineTo(x + s * 0.88, y - s * 0.64);
-      ctx.stroke();
-      // Horn bell (flared opening)
-      ctx.fillStyle = '#0e3a5a';
-      ctx.beginPath();
-      ctx.ellipse(x + s * 0.96, y - s * 0.72, s * 0.26, s * 0.18, -0.52, 0, Math.PI * 2);
+      ctx.ellipse(x, y - s * 0.12, s * 0.3, s * 0.18, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#5ab8ff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      // Gas puffing from horn bell
-      ctx.globalAlpha = 0.38;
+      // Poop surface bubbles
+      ctx.globalAlpha = 0.55;
+      const bubblePhase = this.ringAnim;
       for (let i = 0; i < 3; i++) {
-        const pr = 3 + i * 3;
-        const px2 = x + s * (1.08 + i * 0.14);
-        const py2 = y - s * (0.72 + i * 0.06);
-        const pGrd = ctx.createRadialGradient(px2, py2, 0, px2, py2, pr);
-        pGrd.addColorStop(0, '#a0ff80cc');
-        pGrd.addColorStop(1, '#44aa2200');
-        ctx.fillStyle = pGrd;
+        const bx2 = x + Math.cos(bubblePhase + i * 2.1) * s * 0.13;
+        const by2 = y - s * 0.12 + Math.sin(bubblePhase * 0.7 + i * 1.4) * s * 0.06;
+        ctx.fillStyle = '#7a3a18';
         ctx.beginPath();
-        ctx.arc(px2, py2, pr, 0, Math.PI * 2);
+        ctx.arc(bx2, by2, s * (0.04 + i * 0.02), 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
-      // Scope dot on top
-      const scopeGrd = ctx.createRadialGradient(x - s * 0.08, y - s * 1.12 - s * 0.08, 0, x, y - s * 1.12, s * 0.3);
-      scopeGrd.addColorStop(0, '#5ab8ff');
-      scopeGrd.addColorStop(1, '#1a5a8e');
-      ctx.fillStyle = scopeGrd;
+
+      // Pedestal base
+      const pedGrd = ctx.createLinearGradient(x - s * 0.3, y + s * 0.6, x + s * 0.3, y + s * 0.85);
+      pedGrd.addColorStop(0, '#d4cfbe');
+      pedGrd.addColorStop(1, '#b0aa98');
+      ctx.fillStyle = pedGrd;
       ctx.beginPath();
-      ctx.arc(x, y - s * 1.12, s * 0.3, 0, Math.PI * 2);
+      ctx.roundRect(x - s * 0.28, y + s * 0.6, s * 0.56, s * 0.22, 4);
       ctx.fill();
-      ctx.strokeStyle = '#a8d8ff';
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.moveTo(x - s * 0.2, y - s * 1.12); ctx.lineTo(x + s * 0.2, y - s * 1.12);
-      ctx.moveTo(x, y - s * 1.32);            ctx.lineTo(x, y - s * 0.92);
-      ctx.stroke();
+
+      // Brown stink wisps rising from bowl
+      ctx.globalAlpha = 0.28;
+      for (let i = 0; i < 2; i++) {
+        const wx = x + (i === 0 ? -s * 0.1 : s * 0.08);
+        const wy = y - s * 0.38;
+        const wGrd = ctx.createRadialGradient(wx, wy, 0, wx, wy, s * 0.22);
+        wGrd.addColorStop(0, '#8B4513aa');
+        wGrd.addColorStop(1, 'rgba(80,30,5,0)');
+        ctx.fillStyle = wGrd;
+        ctx.beginPath();
+        ctx.arc(wx, wy, s * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.globalAlpha = 1;
-      // Attack animation: gas beam from horn
+
+      // Attack animation: brown poop blob shoots from bowl
       if (this.attackAnim > 0) {
         const prog = this.attackAnim;
-        const beamLen = s * (2.5 + 2.5 * (1 - prog));
-        const bx0 = x + s * 0.88, by0 = y - s * 0.64;
-        const dirX = Math.cos(-0.52), dirY = Math.sin(-0.52);
+        const beamLen = s * (3 + 2.5 * (1 - prog));
+        // Aim direction: upward-right from bowl
+        const dirX = Math.cos(-0.7), dirY = Math.sin(-0.7);
+        const bx0 = x + s * 0.3, by0 = y - s * 0.2;
         ctx.save();
-        // Gas beam tube
-        const beamGrd = ctx.createLinearGradient(bx0, by0, bx0 + dirX * beamLen, by0 + dirY * beamLen);
-        beamGrd.addColorStop(0, `rgba(100,220,255,${prog * 0.9})`);
-        beamGrd.addColorStop(0.3, `rgba(50,200,80,${prog * 0.7})`);
-        beamGrd.addColorStop(1, 'rgba(50,150,0,0)');
-        ctx.strokeStyle = beamGrd;
-        ctx.lineWidth = s * 0.45 * prog;
+        // Poop streak
+        const poopGrd = ctx.createLinearGradient(bx0, by0, bx0 + dirX * beamLen, by0 + dirY * beamLen);
+        poopGrd.addColorStop(0, `rgba(139,69,19,${prog * 0.95})`);
+        poopGrd.addColorStop(0.4, `rgba(100,45,10,${prog * 0.7})`);
+        poopGrd.addColorStop(1, 'rgba(60,20,5,0)');
+        ctx.strokeStyle = poopGrd;
+        ctx.lineWidth = s * 0.36 * prog;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(bx0, by0);
         ctx.lineTo(bx0 + dirX * beamLen, by0 + dirY * beamLen);
         ctx.stroke();
-        // Stink puffs along beam
+        // Poop splatter puffs along beam
         for (let i = 0; i < 4; i++) {
-          const t = (i + 0.5) / 4;
-          const px2 = bx0 + dirX * beamLen * t;
-          const py2 = by0 + dirY * beamLen * t;
-          const pr2 = s * 0.3 * prog * (1 - t * 0.5);
+          const t2 = (i + 0.5) / 4;
+          const px2 = bx0 + dirX * beamLen * t2;
+          const py2 = by0 + dirY * beamLen * t2;
+          const pr2 = s * 0.28 * prog * (1 - t2 * 0.5);
           const pGrd = ctx.createRadialGradient(px2, py2, 0, px2, py2, pr2);
-          pGrd.addColorStop(0, `rgba(180,255,100,${prog * 0.5})`);
-          pGrd.addColorStop(1, 'rgba(80,200,0,0)');
+          pGrd.addColorStop(0, `rgba(160,80,20,${prog * 0.6})`);
+          pGrd.addColorStop(1, 'rgba(60,20,5,0)');
           ctx.fillStyle = pGrd;
           ctx.beginPath();
           ctx.arc(px2, py2, pr2, 0, Math.PI * 2);
