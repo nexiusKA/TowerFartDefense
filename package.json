@@ -15,6 +15,6 @@
   "author": "nexiusKA",
   "license": "ISC",
   "devDependencies": {
-    "@babel/parser": "^7.24.0"
+    "@babel/parser": "^7.26.0"
   }
 }
