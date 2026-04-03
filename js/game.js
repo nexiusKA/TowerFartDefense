@@ -196,40 +196,52 @@ class Game {
 
         // ── Base fill ──────────────────────────────────────────────────────
         switch (t) {
-          case T_BUILDING: ctx.fillStyle = '#06081a'; break;
-          case T_ROAD:     ctx.fillStyle = '#0c0c1e'; break;
-          case T_SIDEWALK: ctx.fillStyle = '#10102a'; break;
-          case T_GRASS:    ctx.fillStyle = '#06081a'; break;
-          case T_PAD:      ctx.fillStyle = '#10102a'; break;
-          case T_MANHOLE:  ctx.fillStyle = '#0c0c1e'; break;
+          case T_BUILDING: ctx.fillStyle = '#07080e'; break;
+          case T_ROAD:     ctx.fillStyle = '#0c0e0a'; break;
+          case T_SIDEWALK: ctx.fillStyle = '#10130e'; break;
+          case T_GRASS:    ctx.fillStyle = '#0b0e06'; break;
+          case T_PAD:      ctx.fillStyle = '#10130e'; break;
+          case T_MANHOLE:  ctx.fillStyle = '#0c0e0a'; break;
         }
         ctx.fillRect(x, y, TILE, TILE);
 
         // ── Building details ───────────────────────────────────────────────
         if (t === T_BUILDING) {
-          // Subtle neon gradient sheen on building face
+          // Gritty brown-green sheen on building face
           const fogGrd = ctx.createLinearGradient(x, y, x + TILE, y + TILE);
-          fogGrd.addColorStop(0, 'rgba(0,30,60,0.10)');
-          fogGrd.addColorStop(1, 'rgba(20,0,40,0.12)');
+          fogGrd.addColorStop(0, 'rgba(20,30,0,0.12)');
+          fogGrd.addColorStop(1, 'rgba(10,20,0,0.14)');
           ctx.fillStyle = fogGrd;
           ctx.fillRect(x, y, TILE, TILE);
 
-          // Windows – neon cyberpunk palette
+          // Stain/grime streaks on building face
+          if ((c * 7 + r * 3) % 5 === 0) {
+            ctx.globalAlpha = 0.10;
+            ctx.fillStyle = '#446600';
+            ctx.beginPath();
+            ctx.moveTo(x + TILE * 0.3, y + TILE * 0.05);
+            ctx.bezierCurveTo(x + TILE * 0.28, y + TILE * 0.4, x + TILE * 0.32, y + TILE * 0.7, x + TILE * 0.3, y + TILE);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#446600';
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+
+          // Windows — grimy urban palette (yellows, greens, some dark)
           ctx.globalAlpha = 0.7;
           for (let wy = 7; wy < TILE - 7; wy += 14) {
             for (let wx = 7; wx < TILE - 7; wx += 14) {
               const litType = (c * 3 + r * 7 + Math.floor(wx / 14) * 2 + Math.floor(wy / 14)) % 8;
-              if      (litType === 0)  ctx.fillStyle = '#04040e';        // dark / off
-              else if (litType === 1)  ctx.fillStyle = '#002244';        // deep blue
-              else if (litType === 2)  ctx.fillStyle = '#00ffee88';      // cyan glow
-              else if (litType === 3)  ctx.fillStyle = '#ff00cc66';      // hot pink glow
-              else if (litType === 4)  ctx.fillStyle = '#0088ff88';      // blue glow
-              else                     ctx.fillStyle = '#ffaa0066';      // orange/amber
+              if      (litType === 0)  ctx.fillStyle = '#080808';        // dark / off
+              else if (litType === 1)  ctx.fillStyle = '#1a1a00';        // very dark yellow
+              else if (litType === 2)  ctx.fillStyle = '#aacc0066';      // yellow-green glow
+              else if (litType === 3)  ctx.fillStyle = '#88aa0055';      // olive glow
+              else if (litType === 4)  ctx.fillStyle = '#cc880044';      // amber
+              else                     ctx.fillStyle = '#446600aa';      // murky green
               ctx.fillRect(x + wx, y + wy, 8, 8);
-              // Window shine
-              if (litType !== 0 && litType !== 1) {
-                ctx.globalAlpha = 0.18;
-                ctx.fillStyle = '#ffffff';
+              if (litType >= 2) {
+                ctx.globalAlpha = 0.15;
+                ctx.fillStyle = '#ffffaa';
                 ctx.fillRect(x + wx, y + wy, 8, 2);
                 ctx.globalAlpha = 0.7;
               }
@@ -237,11 +249,11 @@ class Game {
           }
           ctx.globalAlpha = 1;
 
-          // Neon billboard / hologram sign on some buildings
+          // Urban billboard / graffiti sign on some buildings
           if (r === 0 && c % 4 === 1) {
             ctx.save();
-            ctx.globalAlpha = 0.55;
-            const signColors = ['#00ffee', '#ff00cc', '#ffaa00', '#00aaff'];
+            ctx.globalAlpha = 0.5;
+            const signColors = ['#aacc00', '#cc8800', '#88aa00', '#ccaa00'];
             ctx.strokeStyle = signColors[c % signColors.length];
             ctx.lineWidth = 1.5;
             ctx.strokeRect(x + TILE * 0.12, y + TILE * 0.18, TILE * 0.76, TILE * 0.44);
@@ -249,73 +261,73 @@ class Game {
             ctx.font = `bold ${TILE * 0.17}px monospace`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            const labels = ['GAS\nCO', 'FART\nINC', 'STINK\nCORP', 'TOXIC\nBOT'];
+            const labels = ['RAT\nBAIT', 'DUMP\nCO', 'STINK\nINC', 'SEWER\nGAS'];
             ctx.fillText(labels[c % labels.length].split('\n')[0], x + TILE * 0.5, y + TILE * 0.31);
             ctx.fillText(labels[c % labels.length].split('\n')[1], x + TILE * 0.5, y + TILE * 0.50);
             ctx.restore();
           }
 
-          // Roof antenna / vent pipe (every 4th building in top row)
+          // Roof vent / drain pipe (every 4th building in top row)
           if (r === 0 && c % 4 === 2) {
-            ctx.fillStyle = '#2a2a3e';
+            ctx.fillStyle = '#2a2a1e';
             ctx.fillRect(x + TILE * 0.68, y + TILE * 0.62, 7, TILE * 0.38);
-            ctx.fillStyle = '#1a1a2e';
+            ctx.fillStyle = '#1a1a10';
             ctx.beginPath();
             ctx.arc(x + TILE * 0.715, y + TILE * 0.62, 5.5, Math.PI, 0);
             ctx.fill();
-            // Cyan vent glow
+            // Green gas vent glow
             const ventGrd = ctx.createRadialGradient(
               x + TILE * 0.715, y + TILE * 0.58, 0,
               x + TILE * 0.715, y + TILE * 0.58, 10
             );
-            ventGrd.addColorStop(0, 'rgba(0,255,238,0.35)');
-            ventGrd.addColorStop(1, 'rgba(0,200,255,0)');
+            ventGrd.addColorStop(0, 'rgba(100,220,0,0.40)');
+            ventGrd.addColorStop(1, 'rgba(60,150,0,0)');
             ctx.fillStyle = ventGrd;
             ctx.beginPath();
             ctx.arc(x + TILE * 0.715, y + TILE * 0.58, 10, 0, Math.PI * 2);
             ctx.fill();
           }
 
-          // Neon hazard symbol on some buildings
+          // Graffiti / hazard symbol on some buildings
           if (r === 0 && c % 5 === 0) {
             ctx.save();
             ctx.globalAlpha = 0.28;
-            ctx.fillStyle = '#00ffee';
-            ctx.font = `bold ${TILE * 0.42}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⚡', x + TILE * 0.5, y + TILE * 0.5);
-            ctx.restore();
-          }
-          if (r === 9 && c % 5 === 3) {
-            ctx.save();
-            ctx.globalAlpha = 0.25;
-            ctx.fillStyle = '#ff00cc';
+            ctx.fillStyle = '#aacc00';
             ctx.font = `bold ${TILE * 0.42}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('☣', x + TILE * 0.5, y + TILE * 0.5);
             ctx.restore();
           }
+          if (r === 9 && c % 5 === 3) {
+            ctx.save();
+            ctx.globalAlpha = 0.25;
+            ctx.fillStyle = '#88aa00';
+            ctx.font = `bold ${TILE * 0.42}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐀', x + TILE * 0.5, y + TILE * 0.5);
+            ctx.restore();
+          }
         }
 
         // ── Road details ───────────────────────────────────────────────────
         if (t === T_ROAD) {
-          // Subtle road surface texture
+          // Gritty road surface texture
           const roadSheen = ctx.createLinearGradient(x, y, x + TILE, y + TILE);
-          roadSheen.addColorStop(0, 'rgba(0,30,60,0.06)');
-          roadSheen.addColorStop(1, 'rgba(0,0,20,0.06)');
+          roadSheen.addColorStop(0, 'rgba(10,20,0,0.06)');
+          roadSheen.addColorStop(1, 'rgba(5,10,0,0.06)');
           ctx.fillStyle = roadSheen;
           ctx.fillRect(x, y, TILE, TILE);
 
           const isHoriz = (r === 3 || r === 4 || r === 6 || r === 7);
           if (isHoriz && r % 2 === 0) {
-            // Neon cyan lane dash
-            ctx.shadowColor = '#00ccff';
-            ctx.shadowBlur  = 4;
-            ctx.strokeStyle = '#00ccff';
+            // Yellow-green lane dash (stinky road markings)
+            ctx.shadowColor = '#aacc00';
+            ctx.shadowBlur  = 3;
+            ctx.strokeStyle = '#aacc0099';
             ctx.lineWidth   = 1.5;
-            ctx.globalAlpha = 0.6;
+            ctx.globalAlpha = 0.55;
             ctx.setLineDash([10, 10]);
             ctx.beginPath();
             ctx.moveTo(x, y + TILE / 2);
@@ -325,28 +337,55 @@ class Game {
             ctx.shadowBlur = 0;
             ctx.globalAlpha = 1;
           }
-          // Neon oil-slick puddle (occasional)
+          // Green sewage puddle (occasional)
           if ((c * 5 + r * 7) % 9 === 0) {
             const oilGrd = ctx.createRadialGradient(
               x + TILE * 0.4, y + TILE * 0.6, 0,
               x + TILE * 0.4, y + TILE * 0.6, TILE * 0.24
             );
-            oilGrd.addColorStop(0,   'rgba(0,200,255,0.18)');
-            oilGrd.addColorStop(0.4, 'rgba(180,0,200,0.12)');
+            oilGrd.addColorStop(0,   'rgba(80,160,0,0.28)');
+            oilGrd.addColorStop(0.4, 'rgba(40,100,0,0.16)');
             oilGrd.addColorStop(1,   'rgba(0,0,0,0)');
             ctx.fillStyle = oilGrd;
             ctx.beginPath();
             ctx.ellipse(x + TILE * 0.4, y + TILE * 0.6, TILE * 0.21, TILE * 0.13, 0.35, 0, Math.PI * 2);
             ctx.fill();
           }
+          // Rat silhouette (occasional, only on road tiles)
+          if ((c * 11 + r * 13) % 17 === 4) {
+            const rx = x + TILE * 0.25, ry = y + TILE * 0.68;
+            ctx.save();
+            ctx.globalAlpha = 0.18;
+            ctx.fillStyle = '#1a1a08';
+            // Rat body
+            ctx.beginPath();
+            ctx.ellipse(rx, ry, 7, 4, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            // Rat head
+            ctx.beginPath();
+            ctx.ellipse(rx + 6, ry - 1, 3.5, 2.8, 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            // Rat snout
+            ctx.beginPath();
+            ctx.ellipse(rx + 9, ry - 0.5, 1.8, 1.4, 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            // Rat tail (curved line)
+            ctx.strokeStyle = '#1a1a08';
+            ctx.lineWidth = 1.2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(rx - 7, ry + 1);
+            ctx.bezierCurveTo(rx - 10, ry + 4, rx - 14, ry + 2, rx - 12, ry - 2);
+            ctx.stroke();
+            ctx.restore();
+          }
         }
 
-        // ── Sidewalk / plaza tech-grid detail ──────────────────────────────
+        // ── Sidewalk / plaza urban detail ──────────────────────────────────
         if (t === T_SIDEWALK || t === T_PAD) {
-          ctx.globalAlpha = 0.12;
-          ctx.strokeStyle = '#00ffee';
+          ctx.globalAlpha = 0.10;
+          ctx.strokeStyle = '#446600';
           ctx.lineWidth = 0.5;
-          // Subtle grid lines
           for (let gx = 0; gx <= TILE; gx += 20) {
             ctx.beginPath();
             ctx.moveTo(x + gx, y);
@@ -360,39 +399,102 @@ class Game {
             ctx.stroke();
           }
           ctx.globalAlpha = 1;
+          // Crack lines on sidewalk
+          if ((c * 5 + r * 9) % 7 === 2) {
+            ctx.globalAlpha = 0.14;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(x + TILE * 0.2, y + TILE * 0.6);
+            ctx.lineTo(x + TILE * 0.6, y + TILE * 0.75);
+            ctx.lineTo(x + TILE * 0.7, y + TILE * 0.9);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+          // Trash bag (occasional, only sidewalk)
+          if (t === T_SIDEWALK && (c * 7 + r * 11) % 13 === 3) {
+            ctx.save();
+            ctx.globalAlpha = 0.55;
+            const bagX = x + TILE * 0.68, bagY = y + TILE * 0.55;
+            // Bag body
+            const bagGrd = ctx.createRadialGradient(bagX - 2, bagY - 2, 0, bagX, bagY, 8);
+            bagGrd.addColorStop(0, '#334422');
+            bagGrd.addColorStop(1, '#1a2210');
+            ctx.fillStyle = bagGrd;
+            ctx.beginPath();
+            ctx.ellipse(bagX, bagY, 7, 10, 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            // Bag tie at top
+            ctx.fillStyle = '#556633';
+            ctx.beginPath();
+            ctx.ellipse(bagX, bagY - 9, 3, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Green slime seep
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#66aa00';
+            ctx.beginPath();
+            ctx.ellipse(bagX, bagY + 10, 5, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          // Trash bin/dumpster (rare, only sidewalk)
+          if (t === T_SIDEWALK && (c * 13 + r * 7) % 19 === 5) {
+            ctx.save();
+            ctx.globalAlpha = 0.6;
+            const binX = x + TILE * 0.18, binY = y + TILE * 0.45;
+            // Bin body
+            ctx.fillStyle = '#2a3820';
+            ctx.beginPath();
+            ctx.roundRect(binX, binY, 14, 18, 2);
+            ctx.fill();
+            // Bin lid
+            ctx.fillStyle = '#1e2a16';
+            ctx.beginPath();
+            ctx.roundRect(binX - 1, binY - 3, 16, 5, 2);
+            ctx.fill();
+            // Green stink glow from bin
+            const binGrd = ctx.createRadialGradient(binX + 7, binY - 3, 0, binX + 7, binY - 3, 14);
+            binGrd.addColorStop(0, 'rgba(80,160,0,0.22)');
+            binGrd.addColorStop(1, 'rgba(40,80,0,0)');
+            ctx.fillStyle = binGrd;
+            ctx.beginPath();
+            ctx.arc(binX + 7, binY - 3, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
         }
 
-        // ── Manhole with neon glow ─────────────────────────────────────────
+        // ── Manhole with green sewer gas glow ─────────────────────────────
         if (t === T_MANHOLE) {
           const mx = x + TILE / 2, my = y + TILE / 2;
-          // Ground glow – hot pink/magenta instead of green
+          // Ground glow — toxic green
           const groundGrd = ctx.createRadialGradient(mx, my, 0, mx, my, TILE * 0.56);
-          groundGrd.addColorStop(0, 'rgba(255,0,180,0.18)');
-          groundGrd.addColorStop(1, 'rgba(255,0,180,0)');
+          groundGrd.addColorStop(0, 'rgba(80,200,0,0.25)');
+          groundGrd.addColorStop(1, 'rgba(40,100,0,0)');
           ctx.fillStyle = groundGrd;
           ctx.fillRect(x, y, TILE, TILE);
           // Cover plate
-          ctx.fillStyle = '#1e1e3a';
+          ctx.fillStyle = '#1c1e10';
           ctx.beginPath();
           ctx.arc(mx, my, TILE * 0.38, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = '#ff00cc';
+          ctx.strokeStyle = '#88cc00';
           ctx.lineWidth = 2;
           ctx.globalAlpha = 0.7;
           ctx.stroke();
           ctx.globalAlpha = 1;
-          // Inner glow
+          // Inner toxic gas glow
           const innerGrd = ctx.createRadialGradient(mx, my, 0, mx, my, TILE * 0.34);
-          innerGrd.addColorStop(0, 'rgba(255,0,200,0.18)');
+          innerGrd.addColorStop(0, 'rgba(120,230,0,0.22)');
           innerGrd.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = innerGrd;
           ctx.beginPath();
           ctx.arc(mx, my, TILE * 0.34, 0, Math.PI * 2);
           ctx.fill();
           // Cross grooves
-          ctx.strokeStyle = '#ff00cc';
+          ctx.strokeStyle = '#88cc00';
           ctx.lineWidth = 1.5;
-          ctx.globalAlpha = 0.35;
+          ctx.globalAlpha = 0.38;
           ctx.beginPath();
           ctx.moveTo(x + TILE * 0.15, my); ctx.lineTo(x + TILE * 0.85, my);
           ctx.moveTo(mx, y + TILE * 0.15); ctx.lineTo(mx, y + TILE * 0.85);
@@ -404,14 +506,14 @@ class Game {
           ctx.moveTo(x + TILE * 0.73, y + TILE * 0.27); ctx.lineTo(x + TILE * 0.27, y + TILE * 0.73);
           ctx.stroke();
           ctx.globalAlpha = 1;
-          // "SEWER" warning text
+          // "SEWAGE" warning text
           ctx.save();
-          ctx.globalAlpha = 0.22;
-          ctx.fillStyle = '#ff00cc';
-          ctx.font = `bold ${TILE * 0.16}px monospace`;
+          ctx.globalAlpha = 0.25;
+          ctx.fillStyle = '#88cc00';
+          ctx.font = `bold ${TILE * 0.14}px monospace`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText('SEWER', mx, my + TILE * 0.5);
+          ctx.fillText('SEWAGE', mx, my + TILE * 0.5);
           ctx.restore();
         }
 
@@ -452,19 +554,36 @@ class Game {
       }
     }
 
-    // ── Atmospheric neon haze overlay ─────────────────────────────────────
+    // ── Atmospheric green gas haze overlay ───────────────────────────────
     const fogOverlay = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
-    fogOverlay.addColorStop(0,   'rgba(0,5,30,0.18)');
-    fogOverlay.addColorStop(0.5, 'rgba(0,0,10,0)');
-    fogOverlay.addColorStop(1,   'rgba(0,5,30,0.18)');
+    fogOverlay.addColorStop(0,   'rgba(20,30,0,0.16)');
+    fogOverlay.addColorStop(0.5, 'rgba(5,8,0,0)');
+    fogOverlay.addColorStop(1,   'rgba(20,30,0,0.16)');
     ctx.fillStyle = fogOverlay;
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
 
-    // ── Neon border frame around entire map ────────────────────────────────
+    // Floating green smelly dust clouds across the map
+    const t_now = performance.now() * 0.001;
+    for (let i = 0; i < 8; i++) {
+      const cx = ((i * 137.5 + t_now * (8 + i * 3)) % LOGICAL_W);
+      const cy = 60 + (i * 73) % (LOGICAL_H - 120);
+      const cr = 30 + (i * 23) % 50;
+      const alpha = 0.04 + 0.03 * Math.sin(t_now * 0.7 + i);
+      const dustGrd = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
+      dustGrd.addColorStop(0, `rgba(80,160,0,${alpha * 1.5})`);
+      dustGrd.addColorStop(0.5, `rgba(60,120,0,${alpha})`);
+      dustGrd.addColorStop(1, 'rgba(30,60,0,0)');
+      ctx.fillStyle = dustGrd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ── Grimy green border frame around entire map ────────────────────────
     ctx.save();
-    ctx.shadowColor = '#00ffee';
-    ctx.shadowBlur  = 12;
-    ctx.strokeStyle = '#00ffee44';
+    ctx.shadowColor = '#88cc00';
+    ctx.shadowBlur  = 10;
+    ctx.strokeStyle = '#88cc0033';
     ctx.lineWidth   = 2;
     ctx.strokeRect(1, 1, LOGICAL_W - 2, LOGICAL_H - 2);
     ctx.shadowBlur  = 0;
@@ -472,7 +591,7 @@ class Game {
 
     // ── Dashed path preview line ───────────────────────────────────────────
     ctx.globalAlpha = 0.10;
-    ctx.strokeStyle = '#00ffee';
+    ctx.strokeStyle = '#88cc00';
     ctx.lineWidth   = 3;
     ctx.setLineDash([14, 10]);
     ctx.beginPath();

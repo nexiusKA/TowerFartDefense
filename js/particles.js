@@ -157,37 +157,34 @@ function spawnFartCloud(x, y, color, count = 8) {
 }
 
 function spawnExplosion(x, y) {
-  addScreenShake(10);
-  const colors = ['#f39c12', '#e74c3c', '#f1c40f', '#ffffff', '#e67e22', '#ff6644'];
-  // Sparks
-  for (let i = 0; i < 30; i++) {
+  addScreenShake(8);
+  const colors = ['#c8a020', '#8a5010', '#cddc39', '#8dc829', '#aacc00', '#ffee44'];
+  // Gas burst puffs — large stink cloud
+  for (let i = 0; i < 22; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 1.5 + Math.random() * 6.5;
+    const speed = 0.8 + Math.random() * 3.5;
     particles.push(new Particle(
-      x, y,
+      x + (Math.random() - 0.5) * 16, y + (Math.random() - 0.5) * 16,
       colors[Math.floor(Math.random() * colors.length)],
-      Math.cos(angle) * speed, Math.sin(angle) * speed,
-      400 + Math.random() * 320, 2 + Math.random() * 4, 'spark'
+      Math.cos(angle) * speed, Math.sin(angle) * speed - 0.4,
+      500 + Math.random() * 500, 5 + Math.random() * 9, 'gas'
     ));
   }
-  // Smoke puffs
-  for (let i = 0; i < 12; i++) {
+  // Stink smoke
+  for (let i = 0; i < 10; i++) {
     const angle = Math.random() * Math.PI * 2;
     particles.push(new Particle(
-      x + (Math.random() - 0.5) * 22, y + (Math.random() - 0.5) * 22,
-      '#aaa',
-      Math.cos(angle) * 0.5, Math.sin(angle) * 0.5 - 0.9,
-      650 + Math.random() * 420, 6 + Math.random() * 9, 'smoke'
+      x + (Math.random() - 0.5) * 24, y + (Math.random() - 0.5) * 24,
+      '#888',
+      Math.cos(angle) * 0.4, Math.sin(angle) * 0.4 - 0.7,
+      700 + Math.random() * 400, 7 + Math.random() * 8, 'smoke'
     ));
   }
-  // Gas burst
-  for (let i = 0; i < 14; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 0.5 + Math.random() * 2.5;
-    particles.push(new Particle(
-      x, y, '#e67e22',
-      Math.cos(angle) * speed, Math.sin(angle) * speed - 0.5,
-      380 + Math.random() * 300, 5 + Math.random() * 10, 'gas'
+  // Stink lines burst
+  for (let i = 0; i < 6; i++) {
+    particles.push(new StinkLine(
+      x + (Math.random() - 0.5) * 30, y + (Math.random() - 0.5) * 20,
+      colors[Math.floor(Math.random() * colors.length)]
     ));
   }
 }
@@ -210,29 +207,53 @@ function spawnDeathBurst(x, y, color) {
 }
 
 function spawnMetalImpact(x, y, range) {
-  addScreenShake(6);
-  const sparkColors = ['#88bbff', '#aaccff', '#ffffff', '#5588cc', '#ffeeaa'];
-  // Metal shards / sparks radiating outward
-  for (let i = 0; i < 22; i++) {
+  addScreenShake(5);
+  const gasColors = ['#aaff44', '#80cc00', '#cddc39', '#8dc829', '#66ff00'];
+  for (let i = 0; i < 18; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 1.2 + Math.random() * 4.5;
+    const speed = 0.8 + Math.random() * 3.5;
     particles.push(new Particle(
-      x + (Math.random() - 0.5) * range * 0.8,
-      y + (Math.random() - 0.5) * 10,
-      sparkColors[Math.floor(Math.random() * sparkColors.length)],
-      Math.cos(angle) * speed, Math.sin(angle) * speed - 0.8,
-      280 + Math.random() * 240, 2 + Math.random() * 3, 'spark'
+      x + (Math.random() - 0.5) * range * 0.7,
+      y + (Math.random() - 0.5) * 12,
+      gasColors[Math.floor(Math.random() * gasColors.length)],
+      Math.cos(angle) * speed, Math.sin(angle) * speed - 0.6,
+      350 + Math.random() * 300, 3 + Math.random() * 5, 'gas'
     ));
   }
-  // Small debris circles
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 6; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 0.5 + Math.random() * 2.0;
     particles.push(new Particle(
       x + (Math.random() - 0.5) * range * 0.5, y,
-      '#6699cc',
-      Math.cos(angle) * speed, Math.sin(angle) * speed,
-      350 + Math.random() * 250, 3 + Math.random() * 4, 'circle'
+      '#88cc44',
+      Math.cos(angle) * 0.5, Math.sin(angle) * 0.5,
+      400 + Math.random() * 250, 4 + Math.random() * 5, 'circle'
+    ));
+  }
+}
+
+// Spawns a toxic green fart cloud slam effect for the Fogger tower's area attack.
+// Replaces the old spawnMetalImpact with an organic gas cloud ring + stink lines.
+function spawnFartCloudSlam(x, y, range) {
+  addScreenShake(6);
+  const cloudColors = ['#aaff44', '#80cc00', '#cddc39', '#8dc829', '#66ee22', '#bbff00'];
+  // Big expanding fart cloud ring
+  for (let i = 0; i < 28; i++) {
+    const angle = (i / 28) * Math.PI * 2 + Math.random() * 0.4;
+    const speed = 1.0 + Math.random() * 3.0;
+    const dist  = range * (0.3 + Math.random() * 0.7);
+    particles.push(new Particle(
+      x + Math.cos(angle) * dist * 0.4, y + Math.sin(angle) * dist * 0.12,
+      cloudColors[Math.floor(Math.random() * cloudColors.length)],
+      Math.cos(angle) * speed, Math.sin(angle) * speed * 0.3 - 0.5,
+      500 + Math.random() * 500, 5 + Math.random() * 10, 'gas'
+    ));
+  }
+  // Stink lines
+  for (let i = 0; i < 8; i++) {
+    particles.push(new StinkLine(
+      x + (Math.random() - 0.5) * range,
+      y + (Math.random() - 0.5) * range * 0.3,
+      cloudColors[Math.floor(Math.random() * cloudColors.length)]
     ));
   }
 }
