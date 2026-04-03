@@ -33,6 +33,7 @@ class Game {
     this.manholePositions = this._computeManholePositions();
     this.lastTime    = 0;
     this.ambientTimer = 0;   // throttle ambient gas spawns
+    this.uiTimer      = 0;   // throttle DOM updates
 
     this._resize();
     this.updateUI();
@@ -124,6 +125,13 @@ class Game {
 
     updateParticles(dt);
 
+    // Periodic UI refresh for wave progress bar
+    this.uiTimer += dt;
+    if (this.uiTimer > UI_UPDATE_INTERVAL_MS) {
+      this.uiTimer = 0;
+      this.updateUI();
+    }
+
     // Ambient manhole gas wisps
     this.ambientTimer += dt;
     if (this.ambientTimer > 220) {
@@ -191,6 +199,82 @@ class Game {
 
     // Entrance / exit markers
     this._drawEntryExit(ctx);
+
+    ctx.restore();
+
+    // Wave HUD overlay (drawn in canvas pixel space for crisp readability)
+    this._drawWaveHUD(ctx);
+  }
+
+  _drawWaveHUD(ctx) {
+    const wm = this.waveManager;
+    if (wm.waveNum === 0) return;
+
+    const cw = this.canvas.width;
+    const isBossWave = wm.waveNum % 5 === 0;
+    const waveColor  = isBossWave ? '#ff3344' : '#00ffee';
+    const t_now      = performance.now() * 0.003;
+
+    ctx.save();
+
+    // ── Wave number banner ─────────────────────────────────────────────────
+    const alpha = isBossWave ? 0.7 + 0.3 * Math.sin(t_now * 4) : 1;
+    ctx.globalAlpha = alpha;
+    ctx.font         = 'bold 16px monospace';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle    = waveColor;
+    ctx.shadowColor  = waveColor;
+    ctx.shadowBlur   = 12;
+    const label = isBossWave
+      ? `💀 BOSS WAVE ${wm.waveNum} 💀`
+      : `🌊 Wave ${wm.waveNum}`;
+    ctx.fillText(label, cw / 2, 6);
+    ctx.shadowBlur  = 0;
+    ctx.globalAlpha = 1;
+
+    // ── Progress bar ───────────────────────────────────────────────────────
+    if (wm.totalInWave > 0) {
+      const alive  = this.enemies.filter(e => !e.dead && !e.reached).length;
+      const killed = Math.max(0, wm.totalInWave - wm.totalQueued - alive);
+      const pct    = killed / wm.totalInWave;
+
+      const barW = Math.min(240, cw * 0.3);
+      const barH = 6;
+      const bx   = (cw - barW) / 2;
+      const by   = 26;
+
+      // Track
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, barW, barH, 3);
+      ctx.fill();
+
+      // Fill
+      if (pct > 0) {
+        ctx.fillStyle = isBossWave ? '#ff3344' : '#00ffee';
+        ctx.shadowColor = waveColor;
+        ctx.shadowBlur  = 4;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, barW * pct, barH, 3);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // Border
+      ctx.strokeStyle = waveColor + '55';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, barW, barH, 3);
+      ctx.stroke();
+
+      // Label
+      ctx.font         = '10px monospace';
+      ctx.fillStyle    = '#ffffffaa';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(`${killed}/${wm.totalInWave} eliminated`, cw / 2, by + barH + 3);
+    }
 
     ctx.restore();
   }
@@ -661,7 +745,7 @@ class Game {
   _trySelectTower(lx, ly) {
     let found = null;
     for (const t of this.towers) {
-      if (Math.hypot(lx - t.x, ly - t.y) < 28) { found = t; break; }
+      if (Math.hypot(lx - t.x, ly - t.y) < 20) { found = t; break; }
     }
     found ? this._selectTower(found) : this._deselectTower();
   }
@@ -705,9 +789,42 @@ class Game {
     document.getElementById('statWave').textContent   = this.waveManager.waveNum;
     document.getElementById('statKills').textContent  = this.kills;
 
-    const alive = this.enemies.filter(e => !e.dead && !e.reached).length;
+    const alive  = this.enemies.filter(e => !e.dead && !e.reached).length;
     const queued = this.waveManager.totalQueued;
     document.getElementById('statEnemies').textContent = alive + queued;
+
+    // ── Wave detail panel ──────────────────────────────────────────────────
+    const wm = this.waveManager;
+    const isBossWave = wm.waveNum > 0 && wm.waveNum % 5 === 0;
+
+    if (wm.waveNum > 0 && wm.totalInWave > 0) {
+      const killed = Math.max(0, wm.totalInWave - queued - alive);
+      const pct    = Math.round((killed / wm.totalInWave) * 100);
+      document.getElementById('waveProgress').style.width = pct + '%';
+      document.getElementById('waveProgressWrap').style.display = 'block';
+
+      // Composition breakdown
+      const typeEmoji = { basic: '🐾', fast: '⚡', tank: '🛡️', stealth: '👤', swarm: '🦟', boss: '💀' };
+      const parts = Object.entries(wm.waveComposition)
+        .map(([t, c]) => `${typeEmoji[t] || '❓'}×${c}`);
+      document.getElementById('waveComposition').textContent = parts.join('  ');
+      document.getElementById('waveComposition').style.display = 'block';
+    } else {
+      document.getElementById('waveProgressWrap').style.display = 'none';
+      document.getElementById('waveComposition').style.display  = 'none';
+    }
+
+    // Boss alert
+    document.getElementById('bossAlert').style.display = isBossWave ? 'block' : 'none';
+
+    // Next boss info
+    if (wm.waveNum > 0) {
+      const nextBoss = Math.ceil((wm.waveNum + 1) / 5) * 5;
+      document.getElementById('nextBossInfo').textContent = `Next boss: Wave ${nextBoss}`;
+      document.getElementById('nextBossInfo').style.display = 'block';
+    } else {
+      document.getElementById('nextBossInfo').style.display = 'none';
+    }
   }
 
   gameOver() {

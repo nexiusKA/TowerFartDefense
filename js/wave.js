@@ -8,22 +8,24 @@ function buildWave(w) {
   const hpScale   = Math.pow(1.08, w - 1);
   const entries   = [];
 
-  // Boss every 5 waves
+  // Boss every 5 waves; extra boss per 10 waves for extra chaos
   if (w % 5 === 0 && w > 0) {
-    entries.push({ type: 'boss', count: 1, interval: 2000, hpScale });
+    const bossCount = 1 + Math.floor(w / 10);
+    entries.push({ type: 'boss', count: bossCount, interval: 2000, hpScale });
   }
 
-  const basic   = 3 + w * 2;
-  const fast    = w >= 2 ? 1 + Math.floor(w * 0.9) : 0;
-  const tank    = w >= 3 ? Math.floor(w * 0.5)      : 0;
-  const stealth = w >= 4 ? Math.floor(w * 0.4)      : 0;
-  const swarm   = w >= 5 ? Math.floor((w - 4) * 1.8): 0;
+  // Increased enemy counts to fill the bigger map
+  const basic   = 5 + w * 3;
+  const fast    = w >= 2 ? 2 + Math.floor(w * 1.3) : 0;
+  const tank    = w >= 3 ? Math.floor(w * 0.7)      : 0;
+  const stealth = w >= 4 ? Math.floor(w * 0.6)      : 0;
+  const swarm   = w >= 5 ? Math.floor((w - 4) * 2.5) : 0;
 
-  entries.push({ type: 'basic', count: basic, interval: Math.max(550, 1200 - w * 30), hpScale });
-  if (fast)    entries.push({ type: 'fast',    count: fast,    interval: Math.max(350, 900 - w * 20), hpScale });
-  if (tank)    entries.push({ type: 'tank',    count: tank,    interval: Math.max(750, 1800 - w * 40), hpScale });
-  if (stealth) entries.push({ type: 'stealth', count: stealth, interval: Math.max(450, 1000 - w * 25), hpScale });
-  if (swarm)   entries.push({ type: 'swarm', count: swarm, interval: Math.max(120, 350 - w * 15), hpScale: 1 }); // swarms stay fragile by design
+  entries.push({ type: 'basic', count: basic, interval: Math.max(500, 1100 - w * 25), hpScale });
+  if (fast)    entries.push({ type: 'fast',    count: fast,    interval: Math.max(300, 850 - w * 18), hpScale });
+  if (tank)    entries.push({ type: 'tank',    count: tank,    interval: Math.max(700, 1600 - w * 35), hpScale });
+  if (stealth) entries.push({ type: 'stealth', count: stealth, interval: Math.max(400, 950 - w * 22), hpScale });
+  if (swarm)   entries.push({ type: 'swarm',   count: swarm,   interval: Math.max(100, 300 - w * 12), hpScale: 1 }); // swarms stay fragile by design
 
   // Flatten into individual spawn entries
   const queue = [];
@@ -37,11 +39,13 @@ function buildWave(w) {
 
 class WaveManager {
   constructor() {
-    this.waveNum   = 0;
-    this.spawnQueue = [];
-    this.spawnTimer = 0;
-    this.active     = false;
-    this.bonusGiven = false;
+    this.waveNum      = 0;
+    this.spawnQueue   = [];
+    this.spawnTimer   = 0;
+    this.active       = false;
+    this.bonusGiven   = false;
+    this.totalInWave  = 0;       // total enemies spawned at wave start
+    this.waveComposition = {};   // { type: count } breakdown for UI
   }
 
   get totalQueued() { return this.spawnQueue.length; }
@@ -49,11 +53,19 @@ class WaveManager {
   startWave() {
     this.waveNum++;
     this.spawnQueue = buildWave(this.waveNum);
+    this.totalInWave = this.spawnQueue.length;
+
+    // Compute composition breakdown for the wave info HUD
+    this.waveComposition = {};
+    for (const e of this.spawnQueue) {
+      this.waveComposition[e.type] = (this.waveComposition[e.type] || 0) + 1;
+    }
+
     this.spawnTimer = 0;
     this.active     = true;
     this.bonusGiven = false;
     document.getElementById('btnNextWave').disabled = true;
-    showMessage(`🌊 Wave ${this.waveNum} incoming!`);
+    showMessage(`🌊 Wave ${this.waveNum} incoming! ${this.totalInWave} enemies`);
     game.updateUI();
   }
 

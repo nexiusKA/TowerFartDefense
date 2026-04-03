@@ -92,7 +92,7 @@ class Tower {
   }
 
   draw(ctx) {
-    const s = 22;
+    const s = 15;
     const x = this.x, y = this.y;
 
     // ── Range ring when selected ──────────────────────────────────────────
