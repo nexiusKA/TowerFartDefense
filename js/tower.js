@@ -19,8 +19,17 @@ class Tower {
     this.barDropAnim = 0;   // 0 = idle, 1→0 = bar dropping animation progress
   }
 
-  get fireRate()    { return Math.max(MIN_FIRE_RATE_MS, this.def.fireRate + (this.level - 1) * this.def.upgradeFireRate); }
-  get damage()      { return this.def.damage + (this.level - 1) * this.def.upgradeDmg; }
+  get fireRate() {
+    const base = soundDurations[this.def.sound] ?? this.def.fireRate;
+    return Math.max(MIN_FIRE_RATE_MS, base + (this.level - 1) * this.def.upgradeFireRate);
+  }
+  get damage() {
+    const dur = soundDurations[this.def.sound];
+    const base = (dur != null && this.def.fireRate > 0)
+      ? Math.round(this.def.damage * dur / this.def.fireRate)
+      : this.def.damage;
+    return base + (this.level - 1) * this.def.upgradeDmg;
+  }
   get upgradeCost() { return this.def.upgradeCost * this.level; }
   get sellValue()   { return Math.floor(this.def.cost * this.def.sellRatio + (this.level - 1) * this.def.upgradeCost * 0.4); }
   canUpgrade()      { return this.level < 3; }
