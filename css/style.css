@@ -199,7 +199,7 @@ body, html {
   box-shadow: 0 0 24px #00ffee0c;
 }
 #overlay button {
-  margin-top: 22px; padding: 14px 40px; font-size: 19px;
+  margin-top: 0; padding: 14px 40px; font-size: 19px;
   background: linear-gradient(135deg, #0a3a6a, #1a80cc);
   border: 1px solid #00ffee44; border-radius: 12px; color: #fff;
   cursor: pointer; font-weight: bold; letter-spacing: 2px;
@@ -207,6 +207,18 @@ body, html {
   transition: box-shadow .2s, transform .1s;
 }
 #overlay button:hover { box-shadow: 0 6px 30px #1a80cc99, 0 0 60px #00ffee44; transform: scale(1.04); }
+#btnGenerateMap {
+  background: linear-gradient(135deg, #3a1a00, #8B4513) !important;
+  border-color: #a0522d44 !important;
+  box-shadow: 0 4px 22px #8B451366, 0 0 40px #a0522d22 !important;
+  font-size: 16px !important;
+  padding: 14px 28px !important;
+}
+#btnGenerateMap:hover { box-shadow: 0 6px 30px #8B451399, 0 0 60px #a0522d44 !important; }
+/* Semi-transparent overlay so the map preview is visible behind it */
+#overlay.map-preview {
+  background: radial-gradient(ellipse at center, rgba(5,5,20,0.68) 0%, rgba(3,3,12,0.75) 100%);
+}
 
 /* ── MESSAGE BOX ── */
 #msgBox {
