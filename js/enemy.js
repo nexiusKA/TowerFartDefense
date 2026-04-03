@@ -316,7 +316,9 @@ class Enemy {
   }
 
   _lightenColor(hex, amt) {
-    const n = parseInt(hex.replace('#', ''), 16);
+    const clean = hex.replace('#', '');
+    if (clean.length !== 6) return hex;
+    const n = parseInt(clean, 16);
     const r = Math.min(255, (n >> 16) + amt);
     const g = Math.min(255, ((n >> 8) & 0xFF) + amt);
     const b = Math.min(255, (n & 0xFF) + amt);
@@ -324,7 +326,9 @@ class Enemy {
   }
 
   _darkenColor(hex, amt) {
-    const n = parseInt(hex.replace('#', ''), 16);
+    const clean = hex.replace('#', '');
+    if (clean.length !== 6) return hex;
+    const n = parseInt(clean, 16);
     const r = Math.max(0, (n >> 16) - amt);
     const g = Math.max(0, ((n >> 8) & 0xFF) - amt);
     const b = Math.max(0, (n & 0xFF) - amt);

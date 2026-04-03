@@ -114,7 +114,7 @@ class Tower {
       ctx.save();
       const prog = this.flashTimer / (this.type === 'fogger' ? 350 : 150);
       const flashGrd = ctx.createRadialGradient(x, y, s, x, y, s + 14 + (1 - prog) * 22);
-      flashGrd.addColorStop(0, this.def.color2 + Math.round(prog * 180).toString(16).padStart(2, '0'));
+      flashGrd.addColorStop(0, this.def.color2 + Math.min(255, Math.round(prog * 255)).toString(16).padStart(2, '0'));
       flashGrd.addColorStop(1, this.def.color2 + '00');
       ctx.fillStyle = flashGrd;
       ctx.beginPath();
