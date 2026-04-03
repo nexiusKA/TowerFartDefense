@@ -1,1 +1,76 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Tower Fart Defense</title>\n    <style>\n        body {\n            margin: 0;\n            overflow: hidden;\n            background: #f0f0f0;\n        }\n        canvas {\n            display: block;\n            margin: auto;\n            background: #87CEEB;\n        }\n    </style>\n</head>\n<body>\n    <canvas id="gameCanvas"></canvas>\n    <script>\n        const canvas = document.getElementById('gameCanvas');\n        const ctx = canvas.getContext('2d');\n        canvas.width = window.innerWidth;\n        canvas.height = window.innerHeight;\n\n        // Game variables\n        let towers = [];\n        let enemies = [];\n        let waves = 0;\n        let score = 0;\n\n        // Tower class\n        class Tower {\n            constructor(x, y) {\n                this.x = x;\n                this.y = y;\n                this.range = 100;\n                this.damage = 10;\n            }\n\n            draw() {\n                ctx.fillStyle = 'green';\n                ctx.fillRect(this.x, this.y, 50, 50);\n            }\n        }\n\n        // Enemy class\n        class Enemy {\n            constructor(x, y) {\n                this.x = x;\n                this.y = y;\n                this.health = 20;\n            }\n\n            update() {\n                this.x -= 1; // Move left\n            }\n\n            draw() {\n                ctx.fillStyle = 'red';\n                ctx.fillRect(this.x, this.y, 40, 40);\n            }\n        }\n\n        // Game loop\n        function gameLoop() {\n            ctx.clearRect(0, 0, canvas.width, canvas.height);\n            if (Math.random() < 0.02) {\n                enemies.push(new Enemy(canvas.width, Math.random() * canvas.height));\n            }\n            enemies.forEach((enemy, index) => {\n                enemy.update();\n                enemy.draw();\n                if (enemy.x < 0) {\n                    enemies.splice(index, 1);\n                }\n            });\n            towers.forEach(tower => tower.draw());\n            requestAnimationFrame(gameLoop);\n        }\n\n        // Add towers on click\n        canvas.addEventListener('click', (event) => {\n            const x = event.clientX;\n            const y = event.clientY;\n            towers.push(new Tower(x, y));\n        });\n\n        gameLoop();\n    </script>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Fart Defense</title>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let towers = [];
+        let enemies = [];
+        let waves = 0;
+
+        class Tower {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.range = 100;
+                this.damage = 10;
+                this.attackSpeed = 1000;
+            }
+            draw() {
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(this.x, this.y, 50, 50);
+            }
+        }
+
+        class Enemy {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.health = 100;
+            }
+            update() {
+                this.x -= 1; // Move left
+                if (this.health <= 0) {
+                    // Handle enemy death
+                }
+            }
+            draw() {
+                ctx.fillStyle = 'red';
+                ctx.fillRect(this.x, this.y, 50, 50);
+            }
+        }
+
+        function spawnEnemy() {
+            enemies.push(new Enemy(canvas.width, Math.random() * canvas.height));
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            towers.forEach(tower => tower.draw());
+            enemies.forEach(enemy => {
+                enemy.update();
+                enemy.draw();
+            });
+            requestAnimationFrame(gameLoop);
+        }
+
+        setInterval(spawnEnemy, 2000);
+        gameLoop();
+
+    </script>
+</body>
+</html>
