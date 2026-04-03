@@ -13,12 +13,19 @@ const DEFAULT_SOUNDS = {
   fogger:  'voice_28-03-2026_14-05-59.mp3',
 };
 const defaultSounds = { stinker: null, blaster: null, honker: null, fogger: null };
+// Duration (ms) of the active sound for each tower type; null = use def.fireRate
+const soundDurations = { stinker: null, blaster: null, honker: null, fogger: null };
 
 function loadDefaultSounds() {
   Object.entries(DEFAULT_SOUNDS).forEach(([type, file]) => {
     const audio = new Audio(file);
     audio.volume = 0.4;
     audio.addEventListener('error', () => { defaultSounds[type] = null; });
+    audio.addEventListener('loadedmetadata', () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        soundDurations[type] = Math.round(audio.duration * 1000);
+      }
+    });
     defaultSounds[type] = audio;
   });
 }
@@ -79,6 +86,11 @@ function initAudioFileInputs() {
       if (this.files[0]) {
         const audio = new Audio(URL.createObjectURL(this.files[0]));
         audio.volume = 0.4;
+        audio.addEventListener('loadedmetadata', () => {
+          if (audio.duration && isFinite(audio.duration)) {
+            soundDurations[t] = Math.round(audio.duration * 1000);
+          }
+        });
         customSounds[t] = audio;
       }
     });

@@ -123,6 +123,8 @@ body, html {
 #btnPause:hover { box-shadow: 0 4px 16px #f39c1288; }
 #btnRestart { background: linear-gradient(135deg, #5a1008, #b02818); color: #fff; box-shadow: 0 2px 8px #b0281855; }
 #btnRestart:hover { box-shadow: 0 4px 16px #e74c3c88; }
+#btnDebug { background: linear-gradient(135deg, #1a0a40, #4a1a90); color: #fff; box-shadow: 0 2px 8px #4a1a9055; }
+#btnDebug:hover { box-shadow: 0 4px 16px #9b59b688; }
 
 #sellBtn {
   display: none; border: none; border-radius: 8px; padding: 5px 8px;

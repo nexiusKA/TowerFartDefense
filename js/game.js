@@ -595,6 +595,42 @@ class Game {
     ov.style.display = 'flex';
   }
 
+  _debugMode() {
+    if (!this.started) {
+      getAudioCtx();
+      this.start();
+    }
+    if (this.over) return;
+
+    // Give plenty of gold
+    this.gold = 9999;
+
+    // Place one tower of each type on every empty build pad (cycling through types)
+    const types = Object.keys(TOWER_DEFS);
+    let typeIdx = 0;
+    for (const pad of this.buildPads) {
+      if (!pad.occupied) {
+        const type = types[typeIdx % types.length];
+        typeIdx++;
+        pad.occupied = true;
+        const idx = this.buildPads.indexOf(pad);
+        this.towers.push(new Tower(type, idx, pad.x, pad.y));
+      }
+    }
+
+    // Skip ahead to wave 6 (set counter to 5 so startWave increments to 6)
+    const DEBUG_TARGET_WAVE = 6;
+    if (this.waveManager.waveNum < DEBUG_TARGET_WAVE - 1) {
+      this.waveManager.waveNum = DEBUG_TARGET_WAVE - 1;
+    }
+    if (!this.waveManager.active) {
+      this.waveManager.startWave();
+    }
+
+    this.updateUI();
+    showMessage('🐛 Debug: all towers placed, wave 6!');
+  }
+
   // ── Events ─────────────────────────────────────────────────────────────────
 
   _bindEvents() {
@@ -656,6 +692,8 @@ class Game {
     });
 
     document.getElementById('btnRestart').addEventListener('click', () => location.reload());
+
+    document.getElementById('btnDebug').addEventListener('click', () => this._debugMode());
 
     document.getElementById('btnStartGame').addEventListener('click', () => {
       getAudioCtx();   // unlock audio on first gesture
