@@ -1,7 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // TOWER  (coordinates in logical space)
 // ─────────────────────────────────────────────────────────────────────────────
-const MIN_FIRE_RATE_MS = 200;  // fastest any tower can shoot (ms between shots)
+const MIN_FIRE_RATE_MS = 200;       // fastest any tower can shoot (ms between shots)
+const CRUSHER_SLAM_MS  = 350;       // duration of the metal bar drop animation (ms)
 class Tower {
   constructor(type, padIndex, x, y) {
     this.type     = type;
@@ -15,6 +16,7 @@ class Tower {
     this.selected  = false;
     this.flashTimer = 0;
     this.ringAnim  = 0;
+    this.barDropAnim = 0;   // 0 = idle, 1→0 = bar dropping animation progress
   }
 
   get fireRate()    { return Math.max(MIN_FIRE_RATE_MS, this.def.fireRate + (this.level - 1) * this.def.upgradeFireRate); }
@@ -26,9 +28,10 @@ class Tower {
   update(dt) {
     this.ringAnim = (this.ringAnim + dt * 0.002) % (Math.PI * 2);
     if (this.flashTimer > 0) this.flashTimer -= dt;
+    if (this.barDropAnim > 0) this.barDropAnim = Math.max(0, this.barDropAnim - dt / CRUSHER_SLAM_MS);
 
     if (this.def.effect === 'cloud') {
-      // Fogger: damage every enemy in range on a timer (no projectile)
+      // Crusher: damage every enemy in range on a timer (no projectile)
       this.cloudTimer += dt;
       if (this.cloudTimer >= this.fireRate) {
         this.cloudTimer = 0;
@@ -41,9 +44,10 @@ class Tower {
           }
         }
         if (hit) {
-          this.flashTimer = 350;
+          this.flashTimer = CRUSHER_SLAM_MS;
+          this.barDropAnim = 1;
           playSound(this.def.sound);
-          spawnFartCloud(this.x, this.y, this.def.color, 6);
+          spawnMetalImpact(this.x, this.y, this.range);
         }
       }
     } else {
@@ -93,26 +97,44 @@ class Tower {
       ctx.restore();
     }
 
-    // ── Fogger: permanent pulsing range aura ──────────────────────────────
+    // ── Crusher: charge-up pulsing indicator (ring contracts before slam) ────
     if (this.type === 'fogger') {
+      const chargeProgress = this.cloudTimer / this.fireRate;  // 0→1 between slams
       const pulse = 0.5 + 0.5 * Math.sin(this.ringAnim * 3);
       ctx.save();
-      const auraGrd = ctx.createRadialGradient(x, y, 0, x, y, this.range);
-      auraGrd.addColorStop(0, this.def.color + '00');
-      auraGrd.addColorStop(0.7, this.def.color + '18');
-      auraGrd.addColorStop(1,   this.def.color + '00');
-      ctx.globalAlpha = 0.6 + 0.4 * pulse;
+      // Charge aura grows as next slam approaches
+      const auraRadius = this.range * (0.3 + 0.5 * chargeProgress);
+      const auraGrd = ctx.createRadialGradient(x, y, 0, x, y, auraRadius);
+      auraGrd.addColorStop(0, '#5588cc00');
+      auraGrd.addColorStop(0.6, '#5588cc' + Math.round(chargeProgress * 0x30).toString(16).padStart(2, '0'));
+      auraGrd.addColorStop(1,   '#88bbff00');
+      ctx.globalAlpha = 0.5 + 0.3 * pulse * chargeProgress;
       ctx.fillStyle = auraGrd;
       ctx.beginPath();
-      ctx.arc(x, y, this.range * (0.92 + 0.08 * pulse), 0, Math.PI * 2);
+      ctx.arc(x, y, auraRadius, 0, Math.PI * 2);
       ctx.fill();
+      // Dashed charge ring
+      if (chargeProgress > 0.5) {
+        ctx.shadowColor = '#88bbff';
+        ctx.shadowBlur  = 6;
+        ctx.strokeStyle = '#5588cc';
+        ctx.lineWidth   = 1.2;
+        ctx.globalAlpha = (chargeProgress - 0.5) * 2 * 0.7;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(x, y, this.range * chargeProgress, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.shadowBlur  = 0;
+      }
+      ctx.globalAlpha = 1;
       ctx.restore();
     }
 
-    // ── Flash ring when firing ────────────────────────────────────────────
-    if (this.flashTimer > 0) {
+    // ── Flash ring when firing (non-crusher towers) ───────────────────────
+    if (this.flashTimer > 0 && this.type !== 'fogger') {
       ctx.save();
-      const prog = this.flashTimer / (this.type === 'fogger' ? 350 : 150);
+      const prog = this.flashTimer / 150;
       const flashGrd = ctx.createRadialGradient(x, y, s, x, y, s + 14 + (1 - prog) * 22);
       flashGrd.addColorStop(0, this.def.color2 + Math.min(255, Math.round(prog * 255)).toString(16).padStart(2, '0'));
       flashGrd.addColorStop(1, this.def.color2 + '00');
@@ -125,8 +147,42 @@ class Tower {
 
     ctx.save();
 
+    // ── Glowing tech platform base ────────────────────────────────────────
+    {
+      const pulse = 0.5 + 0.5 * Math.sin(this.ringAnim * 2.5);
+      const baseGrd = ctx.createRadialGradient(x, y + s * 0.78, 0, x, y + s * 0.78, s * 1.5);
+      baseGrd.addColorStop(0, this.def.color + '44');
+      baseGrd.addColorStop(0.5, this.def.color + '18');
+      baseGrd.addColorStop(1,   this.def.color + '00');
+      ctx.globalAlpha = 0.5 + 0.2 * pulse;
+      ctx.fillStyle = baseGrd;
+      ctx.beginPath();
+      ctx.ellipse(x, y + s * 0.78, s * 1.48, s * 0.44, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Outer platform ring
+      ctx.shadowColor = this.def.color;
+      ctx.shadowBlur  = 8;
+      ctx.strokeStyle = this.def.color;
+      ctx.lineWidth   = 1.5;
+      ctx.globalAlpha = 0.45 + 0.25 * pulse;
+      ctx.beginPath();
+      ctx.ellipse(x, y + s * 0.78, s * 1.1, s * 0.32, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      // Inner dashed circuit ring
+      ctx.strokeStyle = this.def.color2;
+      ctx.lineWidth   = 0.8;
+      ctx.globalAlpha = 0.28;
+      ctx.setLineDash([3, 5]);
+      ctx.beginPath();
+      ctx.ellipse(x, y + s * 0.78, s * 0.72, s * 0.21, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.shadowBlur  = 0;
+      ctx.globalAlpha = 1;
+    }
+
     // ── Drop shadow ───────────────────────────────────────────────────────
-    ctx.fillStyle = 'rgba(0,0,0,0.32)';
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
     ctx.beginPath();
     ctx.ellipse(x + 3, y + s * 0.86, s * 0.88, s * 0.26, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -295,58 +351,114 @@ class Tower {
       ctx.stroke();
 
     } else if (this.type === 'fogger') {
-      // Gas canister — purple with tubes and vents
-      const bodyGrd = ctx.createLinearGradient(x - s * 0.62, 0, x + s * 0.62, 0);
-      bodyGrd.addColorStop(0, '#5a1a7e');
-      bodyGrd.addColorStop(0.4, '#8e44ad');
-      bodyGrd.addColorStop(1, '#3a0a5e');
-      ctx.fillStyle = bodyGrd;
+      // ── Crusher tower — hydraulic metal press ─────────────────────────
+      // Heavy base frame
+      const frameGrd = ctx.createLinearGradient(x - s * 0.7, 0, x + s * 0.7, 0);
+      frameGrd.addColorStop(0, '#1a2a3e');
+      frameGrd.addColorStop(0.35, '#2a4a6e');
+      frameGrd.addColorStop(0.65, '#3a5a88');
+      frameGrd.addColorStop(1, '#1a2a3e');
+      ctx.fillStyle = frameGrd;
       ctx.beginPath();
-      ctx.roundRect(x - s * 0.62, y - s * 0.85, s * 1.24, s * 1.65, 12);
+      ctx.roundRect(x - s * 0.7, y - s * 0.6, s * 1.4, s * 1.5, 6);
       ctx.fill();
-      // Highlight
-      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      // Metal highlight stripe
+      ctx.fillStyle = 'rgba(180,220,255,0.12)';
       ctx.beginPath();
-      ctx.roundRect(x - s * 0.48, y - s * 0.75, s * 0.28, s * 1.1, 6);
+      ctx.roundRect(x - s * 0.55, y - s * 0.5, s * 0.3, s * 1.1, 4);
       ctx.fill();
-      // Glowing vents
-      for (let i = 0; i < 3; i++) {
-        const vy = y - s * 0.3 + i * s * 0.28;
-        ctx.strokeStyle = this.def.color2;
-        ctx.lineWidth = 2;
+      // Hydraulic piston shafts on sides
+      const pistonGrd = ctx.createLinearGradient(x - s * 0.82, 0, x - s * 0.66, 0);
+      pistonGrd.addColorStop(0, '#0e1a2e');
+      pistonGrd.addColorStop(0.5, '#3a5a88');
+      pistonGrd.addColorStop(1, '#0e1a2e');
+      ctx.fillStyle = pistonGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.82, y - s * 0.9, s * 0.16, s * 1.8, 3);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(x + s * 0.66, y - s * 0.9, s * 0.16, s * 1.8, 3);
+      ctx.fill();
+      // Piston highlight
+      ctx.fillStyle = 'rgba(136,187,255,0.3)';
+      ctx.fillRect(x - s * 0.8, y - s * 0.88, 3, s * 1.6);
+      ctx.fillRect(x + s * 0.67, y - s * 0.88, 3, s * 1.6);
+      // Cross-bolt details
+      ctx.fillStyle = '#4a6a9a';
+      const boltPositions = [[-0.46, -0.42], [0.46, -0.42], [-0.46, 0.52], [0.46, 0.52]];
+      for (const [bx, by] of boltPositions) {
         ctx.beginPath();
-        ctx.moveTo(x - s * 0.44, vy);
-        ctx.lineTo(x + s * 0.44, vy);
-        ctx.stroke();
-        const ventGrd = ctx.createLinearGradient(x - s * 0.44, 0, x + s * 0.44, 0);
-        ventGrd.addColorStop(0, 'rgba(155,89,182,0)');
-        ventGrd.addColorStop(0.5, 'rgba(155,89,182,0.28)');
-        ventGrd.addColorStop(1, 'rgba(155,89,182,0)');
-        ctx.fillStyle = ventGrd;
-        ctx.fillRect(x - s * 0.44, vy - 2, s * 0.88, 4);
+        ctx.arc(x + s * bx, y + s * by, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#88aacc';
+        ctx.beginPath();
+        ctx.arc(x + s * bx - 1, y + s * by - 1, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4a6a9a';
       }
-      // Nozzle top
-      const nozzleGrd = ctx.createRadialGradient(x - s * 0.08, y - s * 0.85 - s * 0.1, 0, x, y - s * 0.85, s * 0.37);
-      nozzleGrd.addColorStop(0, '#c07ee0');
-      nozzleGrd.addColorStop(1, '#5a1a7e');
-      ctx.fillStyle = nozzleGrd;
+      // Glowing top cap — where bar launches from
+      const capGrd = ctx.createRadialGradient(x - s * 0.08, y - s * 0.6 - s * 0.1, 0, x, y - s * 0.6, s * 0.44);
+      capGrd.addColorStop(0, '#88bbff');
+      capGrd.addColorStop(0.5, '#3366aa');
+      capGrd.addColorStop(1, '#1a2a4e');
+      ctx.fillStyle = capGrd;
       ctx.beginPath();
-      ctx.arc(x, y - s * 0.85, s * 0.37, 0, Math.PI * 2);
+      ctx.arc(x, y - s * 0.6, s * 0.44, 0, Math.PI * 2);
       ctx.fill();
-      // Gas tube coiling out
-      ctx.strokeStyle = '#3a0a5e';
-      ctx.lineWidth = 4.5;
-      ctx.lineCap = 'round';
+      // Cap ring glow
+      ctx.shadowColor = '#88bbff';
+      ctx.shadowBlur  = 10;
+      ctx.strokeStyle = '#5599dd';
+      ctx.lineWidth   = 1.5;
       ctx.beginPath();
-      ctx.moveTo(x - s * 0.55, y - s * 0.2);
-      ctx.bezierCurveTo(x - s * 0.95, y - s * 0.2, x - s * 0.95, y + s * 0.42, x - s * 0.62, y + s * 0.42);
+      ctx.arc(x, y - s * 0.6, s * 0.44, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.strokeStyle = '#7a3a9e';
-      ctx.lineWidth = 2.2;
+      ctx.shadowBlur = 0;
+      // Crosshair on cap
+      ctx.strokeStyle = 'rgba(136,187,255,0.6)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(x - s * 0.55, y - s * 0.2);
-      ctx.bezierCurveTo(x - s * 0.95, y - s * 0.2, x - s * 0.95, y + s * 0.42, x - s * 0.62, y + s * 0.42);
+      ctx.moveTo(x - s * 0.3, y - s * 0.6); ctx.lineTo(x + s * 0.3, y - s * 0.6);
+      ctx.moveTo(x, y - s * 0.9);           ctx.lineTo(x, y - s * 0.3);
       ctx.stroke();
+    }
+
+    // ── Bar drop animation (Crusher only) ────────────────────────────────
+    if (this.type === 'fogger' && this.barDropAnim > 0) {
+      ctx.save();
+      const prog    = this.barDropAnim;           // 1→0 as animation plays
+      // Phase: 0→0.5 = bar drops from above, 0.5→1 = impact flash fade
+      const dropPhase   = Math.min(1, (1 - prog) * 2);        // 0=top, 1=impact
+      const flashPhase  = Math.max(0, (1 - prog) * 2 - 1);    // 0→1 after impact
+      const barY        = y - this.range * (1 - dropPhase);   // from above down to y
+      const barRadius   = this.range;                          // bar spans full diameter
+      const barH        = 8 + 4 * (1 - dropPhase);
+      // Bar gradient — bright steel with neon edge
+      const barGrd = ctx.createLinearGradient(x - barRadius, barY, x - barRadius, barY + barH);
+      barGrd.addColorStop(0,   'rgba(136,187,255,0.95)');
+      barGrd.addColorStop(0.3, 'rgba(200,230,255,1.0)');
+      barGrd.addColorStop(0.7, 'rgba(100,160,220,0.9)');
+      barGrd.addColorStop(1,   'rgba(50,100,180,0.5)');
+      ctx.shadowColor = '#88bbff';
+      ctx.shadowBlur  = 16;
+      ctx.fillStyle   = barGrd;
+      ctx.fillRect(x - barRadius, barY - barH / 2, barRadius * 2, barH);
+      // Impact shockwave ring at the bottom of the bar when it hits
+      if (dropPhase >= 1) {
+        const ringAlpha = 0.7 * (1 - flashPhase);
+        const ringR = this.range * (0.5 + 0.8 * flashPhase);
+        ctx.globalAlpha = ringAlpha;
+        ctx.shadowColor = '#88bbff';
+        ctx.shadowBlur  = 18;
+        ctx.strokeStyle = '#88bbff';
+        ctx.lineWidth   = 3 * (1 - flashPhase) + 0.5;
+        ctx.beginPath();
+        ctx.ellipse(x, y, ringR, ringR * 0.28, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.shadowBlur  = 0;
+      ctx.globalAlpha = 1;
+      ctx.restore();
     }
 
     // ── Level pips (★ at L2, red ● at L3/max) ────────────────────────────
