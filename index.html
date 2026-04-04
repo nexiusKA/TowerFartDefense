@@ -100,7 +100,27 @@
   <div class="gas-cloud gc2"></div>
   <div class="gas-cloud gc3"></div>
   <h1>💨 Tower Fart Defense</h1>
-  <div class="subtitle">⚡ NEON STINK EDITION ⚡</div>
+  <div class="subtitle" id="overlaySubtitle">⚡ NEON STINK EDITION ⚡</div>
+  <div id="styleSelector">
+    <div class="style-label">🎨 Art Style</div>
+    <div class="style-cards">
+      <div class="style-card selected" data-style="neon">
+        <div class="style-swatch" style="background:linear-gradient(135deg,#e8902a 0%,#c05020 50%,#08081e 100%)"></div>
+        <div class="style-card-name">⚡ Neon Stink</div>
+        <div class="style-card-sub">Current Edition</div>
+      </div>
+      <div class="style-card" data-style="classic">
+        <div class="style-swatch" style="background:linear-gradient(135deg,#87ceeb 0%,#4a9c30 50%,#1a2810 100%)"></div>
+        <div class="style-card-name">🌿 Classic Garden</div>
+        <div class="style-card-sub">Retro Style</div>
+      </div>
+      <div class="style-card" data-style="toxic">
+        <div class="style-swatch" style="background:linear-gradient(135deg,#0d1400 0%,#2a1848 50%,#0a0020 100%)"></div>
+        <div class="style-card-name">☢️ Toxic Wasteland</div>
+        <div class="style-card-sub">New Dimension</div>
+      </div>
+    </div>
+  </div>
   <p style="color:#ff88cc">☠ Ninja Moles are breaching the sewers!</p>
   <div class="how-to">
     Place towers on the <strong style="color:#f5a623">🟡 glowing build pads</strong>.<br>
@@ -118,7 +138,8 @@
 
 <div id="msgBox"></div>
 
-<!-- load order matters: constants → defs → audio → particles → enemy → projectile → tower → wave → game → main -->
+<!-- load order matters: styles → constants → defs → audio → particles → enemy → projectile → tower → wave → game → main -->
+<script src="js/styles.js"></script>
 <script src="js/constants.js"></script>
 <script src="js/defs.js"></script>
 <script src="js/audio.js"></script>

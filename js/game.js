@@ -212,7 +212,7 @@ class Game {
 
     const cw = this.canvas.width;
     const isBossWave = wm.waveNum % 5 === 0;
-    const waveColor  = isBossWave ? '#ff3344' : '#00ffee';
+    const waveColor  = isBossWave ? STYLE.bossHud : STYLE.waveHud;
     const t_now      = performance.now() * 0.003;
 
     ctx.save();
@@ -252,7 +252,7 @@ class Game {
 
       // Fill
       if (pct > 0) {
-        ctx.fillStyle = isBossWave ? '#ff3344' : '#00ffee';
+        ctx.fillStyle = isBossWave ? STYLE.bossHud : STYLE.waveHud;
         ctx.shadowColor = waveColor;
         ctx.shadowBlur  = 4;
         ctx.beginPath();
@@ -280,18 +280,18 @@ class Game {
   }
 
   _drawMap(ctx) {
-    // ── Warm sunset sky gradient behind everything ─────────────────────────
+    // ── Sky gradient behind everything ─────────────────────────────────────────
     const skyGrd = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
-    skyGrd.addColorStop(0,    '#e8902a');
-    skyGrd.addColorStop(0.45, '#d46828');
-    skyGrd.addColorStop(1,    '#c05020');
+    skyGrd.addColorStop(0,    STYLE.sky1);
+    skyGrd.addColorStop(0.45, STYLE.sky2);
+    skyGrd.addColorStop(1,    STYLE.sky3);
     ctx.fillStyle = skyGrd;
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
 
     // ── Distant city silhouette in background ────────────────────────────
     ctx.save();
     ctx.globalAlpha = 0.22;
-    ctx.fillStyle = '#7a3818';
+    ctx.fillStyle = STYLE.silhouette;
     const skylineHeights = [55,70,45,80,60,90,50,75,65,55,85,45,70,60,50,80,65,45,75,60,
                             55,90,50,70,80,45,60,75,55,65];
     for (let i = 0; i < COLS; i++) {
@@ -299,14 +299,14 @@ class Game {
       ctx.fillRect(i * TILE, LOGICAL_H - sh, TILE - 1, sh);
       // Simple window dots on silhouette
       ctx.globalAlpha = 0.12;
-      ctx.fillStyle = '#f0d080';
+      ctx.fillStyle = STYLE.silhouetteWindow;
       for (let wy = LOGICAL_H - sh + 6; wy < LOGICAL_H - 6; wy += 10) {
         for (let wx = i * TILE + 4; wx < (i + 1) * TILE - 4; wx += 8) {
           if ((i * 3 + Math.floor(wy / 10)) % 3 !== 0) ctx.fillRect(wx, wy, 4, 5);
         }
       }
       ctx.globalAlpha = 0.22;
-      ctx.fillStyle = '#7a3818';
+      ctx.fillStyle = STYLE.silhouette;
     }
     ctx.restore();
 
@@ -317,27 +317,27 @@ class Game {
 
         // ── Base fill ──────────────────────────────────────────────────────
         switch (t) {
-          case T_BUILDING: ctx.fillStyle = '#9b6b52'; break;
-          case T_ROAD:     ctx.fillStyle = '#5a5048'; break;
-          case T_SIDEWALK: ctx.fillStyle = '#b8a888'; break;
-          case T_GRASS:    ctx.fillStyle = '#8a7040'; break;
-          case T_PAD:      ctx.fillStyle = '#b8a888'; break;
-          case T_MANHOLE:  ctx.fillStyle = '#5a5048'; break;
+          case T_BUILDING: ctx.fillStyle = STYLE.building; break;
+          case T_ROAD:     ctx.fillStyle = STYLE.road;     break;
+          case T_SIDEWALK: ctx.fillStyle = STYLE.sidewalk; break;
+          case T_GRASS:    ctx.fillStyle = STYLE.grass;    break;
+          case T_PAD:      ctx.fillStyle = STYLE.sidewalk; break;
+          case T_MANHOLE:  ctx.fillStyle = STYLE.road;     break;
         }
         ctx.fillRect(x, y, TILE, TILE);
 
         // ── Building details ───────────────────────────────────────────────
         if (t === T_BUILDING) {
-          // Warm brick face gradient
+          // Brick face gradient
           const brickGrd = ctx.createLinearGradient(x, y, x + TILE, y + TILE);
-          brickGrd.addColorStop(0, 'rgba(200,110,60,0.18)');
-          brickGrd.addColorStop(1, 'rgba(100,45,15,0.22)');
+          brickGrd.addColorStop(0, STYLE.brickGrad1);
+          brickGrd.addColorStop(1, STYLE.brickGrad2);
           ctx.fillStyle = brickGrd;
           ctx.fillRect(x, y, TILE, TILE);
 
           // Horizontal brick mortar lines
           ctx.globalAlpha = 0.18;
-          ctx.strokeStyle = '#5a3018';
+          ctx.strokeStyle = STYLE.mortar;
           ctx.lineWidth = 0.8;
           for (let by = 5; by < TILE; by += 8) {
             ctx.beginPath();
@@ -511,18 +511,18 @@ class Game {
 
         // ── Road details ───────────────────────────────────────────────────
         if (t === T_ROAD) {
-          // Warm asphalt surface sheen
+          // Asphalt surface sheen
           const roadSheen = ctx.createLinearGradient(x, y, x + TILE, y + TILE);
-          roadSheen.addColorStop(0, 'rgba(80,50,20,0.08)');
-          roadSheen.addColorStop(1, 'rgba(40,20,5,0.08)');
+          roadSheen.addColorStop(0, STYLE.roadSheen1);
+          roadSheen.addColorStop(1, STYLE.roadSheen2);
           ctx.fillStyle = roadSheen;
           ctx.fillRect(x, y, TILE, TILE);
 
-          // Yellow centre lane dashes
+          // Centre lane dashes
           if (r % 2 === 0) {
-            ctx.shadowColor = '#d4a820';
+            ctx.shadowColor = STYLE.roadLane.slice(0, 7);
             ctx.shadowBlur  = 2;
-            ctx.strokeStyle = '#d4a82099';
+            ctx.strokeStyle = STYLE.roadLane;
             ctx.lineWidth   = 1.5;
             ctx.globalAlpha = 0.55;
             ctx.setLineDash([10, 10]);
@@ -552,9 +552,9 @@ class Game {
 
         // ── Sidewalk / plaza urban detail ──────────────────────────────────
         if (t === T_SIDEWALK || t === T_PAD) {
-          // Warm concrete slab grid
+          // Concrete slab grid
           ctx.globalAlpha = 0.14;
-          ctx.strokeStyle = '#7a5830';
+          ctx.strokeStyle = STYLE.sidewalkGrid;
           ctx.lineWidth = 0.6;
           for (let gx = 0; gx <= TILE; gx += 20) {
             ctx.beginPath();
@@ -573,7 +573,7 @@ class Game {
           // Crack lines on sidewalk
           if ((c * 5 + r * 9) % 7 === 2) {
             ctx.globalAlpha = 0.16;
-            ctx.strokeStyle = '#5a3818';
+            ctx.strokeStyle = STYLE.sidewalkCrack;
             ctx.lineWidth = 0.8;
             ctx.beginPath();
             ctx.moveTo(x + TILE * 0.2, y + TILE * 0.55);
@@ -641,35 +641,35 @@ class Game {
           }
         }
 
-        // ── Manhole with warm sewer glow ─────────────────────────────────
+        // ── Manhole with sewer glow ───────────────────────────────────────
         if (t === T_MANHOLE) {
           const mx = x + TILE / 2, my = y + TILE / 2;
-          // Ground glow — warm amber steam
+          // Ground glow
           const groundGrd = ctx.createRadialGradient(mx, my, 0, mx, my, TILE * 0.56);
-          groundGrd.addColorStop(0, 'rgba(220,140,40,0.28)');
-          groundGrd.addColorStop(1, 'rgba(120,60,10,0)');
+          groundGrd.addColorStop(0, STYLE.manholeGlow1);
+          groundGrd.addColorStop(1, STYLE.manholeGlow2);
           ctx.fillStyle = groundGrd;
           ctx.fillRect(x, y, TILE, TILE);
-          // Cover plate — warm dark iron
-          ctx.fillStyle = '#2e2018';
+          // Cover plate
+          ctx.fillStyle = STYLE.manholePlate;
           ctx.beginPath();
           ctx.arc(mx, my, TILE * 0.38, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = '#c87830';
+          ctx.strokeStyle = STYLE.manholeBorder;
           ctx.lineWidth = 2;
           ctx.globalAlpha = 0.7;
           ctx.stroke();
           ctx.globalAlpha = 1;
-          // Inner amber glow
+          // Inner glow
           const innerGrd = ctx.createRadialGradient(mx, my, 0, mx, my, TILE * 0.34);
-          innerGrd.addColorStop(0, 'rgba(240,160,40,0.25)');
+          innerGrd.addColorStop(0, STYLE.manholeInner1);
           innerGrd.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = innerGrd;
           ctx.beginPath();
           ctx.arc(mx, my, TILE * 0.34, 0, Math.PI * 2);
           ctx.fill();
           // Cross grooves
-          ctx.strokeStyle = '#c87830';
+          ctx.strokeStyle = STYLE.manholeBorder;
           ctx.lineWidth = 1.5;
           ctx.globalAlpha = 0.40;
           ctx.beginPath();
@@ -686,7 +686,7 @@ class Game {
           // "SEWER" warning text
           ctx.save();
           ctx.globalAlpha = 0.30;
-          ctx.fillStyle = '#d49040';
+          ctx.fillStyle = STYLE.manholeText;
           ctx.font = `bold ${TILE * 0.14}px monospace`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -699,19 +699,19 @@ class Game {
           const pad = this.buildPads.find(p => p.c === c && p.r === r);
           if (pad && !pad.occupied) {
             ctx.globalAlpha = 0.15;
-            ctx.fillStyle   = '#f5a623';
+            ctx.fillStyle   = STYLE.buildPad;
             ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
-            ctx.shadowColor = '#f5a623';
+            ctx.shadowColor = STYLE.buildPad;
             ctx.shadowBlur  = 8;
             ctx.globalAlpha = 0.85;
-            ctx.strokeStyle = '#f5a623';
+            ctx.strokeStyle = STYLE.buildPad;
             ctx.lineWidth   = 1.5;
             ctx.setLineDash([4, 4]);
             ctx.strokeRect(x + 4, y + 4, TILE - 8, TILE - 8);
             ctx.setLineDash([]);
             ctx.shadowBlur  = 0;
             ctx.globalAlpha = 0.65;
-            ctx.fillStyle   = '#f5a623';
+            ctx.fillStyle   = STYLE.buildPad;
             const cs = 4;
             ctx.fillRect(x + 4,               y + 4,              cs, cs);
             ctx.fillRect(x + TILE - 4 - cs,   y + 4,              cs, cs);
@@ -722,13 +722,13 @@ class Game {
         }
 
         // ── Subtle tile grid lines ─────────────────────────────────────────
-        ctx.strokeStyle = 'rgba(60,25,8,0.14)';
+        ctx.strokeStyle = STYLE.tileGrid;
         ctx.lineWidth   = 0.5;
         ctx.strokeRect(x, y, TILE, TILE);
       }
     }
 
-    // ── Animated fluffy clouds drifting across the sky ─────────────────────
+    // ── Animated clouds drifting across the sky ────────────────────────────
     const t_now = performance.now() * 0.001;
     // Clouds float across the top and bottom building rows
     const cloudBands = [TILE * 0.9, TILE * 1.5, LOGICAL_H - TILE * 1.0, LOGICAL_H - TILE * 0.45];
@@ -740,8 +740,8 @@ class Game {
       const alpha  = 0.55 + 0.12 * Math.sin(t_now * 0.5 + i);
       ctx.save();
       ctx.globalAlpha = alpha;
-      // Cloud puffs (warm pink-white)
-      const cloudColor = (i % 2 === 0) ? '#ffe8d8' : '#f8d8c8';
+      // Cloud puffs
+      const cloudColor = (i % 2 === 0) ? STYLE.cloud1 : STYLE.cloud2;
       ctx.fillStyle = cloudColor;
       const puffs = [[0,0,18],[20,-8,14],[38,0,16],[-16,4,12],[54,4,12]]; // [x_offset, y_offset, radius]
       for (const [px, py, pr] of puffs) {
@@ -751,7 +751,7 @@ class Game {
       }
       // Soft outline
       ctx.globalAlpha = alpha * 0.3;
-      ctx.strokeStyle = '#c89870';
+      ctx.strokeStyle = STYLE.cloudStroke;
       ctx.lineWidth = 1;
       for (const [px, py, pr] of puffs) {
         ctx.beginPath();
@@ -761,19 +761,19 @@ class Game {
       ctx.restore();
     }
 
-    // ── Warm amber atmospheric haze overlay ──────────────────────────────
+    // ── Atmospheric haze overlay ──────────────────────────────────────────
     const hazeOverlay = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
-    hazeOverlay.addColorStop(0,   'rgba(200,90,20,0.10)');
-    hazeOverlay.addColorStop(0.5, 'rgba(160,60,10,0)');
-    hazeOverlay.addColorStop(1,   'rgba(200,90,20,0.10)');
+    hazeOverlay.addColorStop(0,   STYLE.haze1);
+    hazeOverlay.addColorStop(0.5, STYLE.haze2);
+    hazeOverlay.addColorStop(1,   STYLE.haze3);
     ctx.fillStyle = hazeOverlay;
     ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
 
-    // ── Warm border frame around entire map ───────────────────────────────
+    // ── Border frame around entire map ────────────────────────────────────
     ctx.save();
-    ctx.shadowColor = '#d47830';
+    ctx.shadowColor = STYLE.frameShadow;
     ctx.shadowBlur  = 10;
-    ctx.strokeStyle = 'rgba(212,120,48,0.30)';
+    ctx.strokeStyle = STYLE.frameColor;
     ctx.lineWidth   = 2;
     ctx.strokeRect(1, 1, LOGICAL_W - 2, LOGICAL_H - 2);
     ctx.shadowBlur  = 0;
@@ -781,7 +781,7 @@ class Game {
 
     // ── Dashed path preview line ───────────────────────────────────────────
     ctx.globalAlpha = 0.12;
-    ctx.strokeStyle = '#e8a030';
+    ctx.strokeStyle = STYLE.pathLine;
     ctx.lineWidth   = 3;
     ctx.setLineDash([14, 10]);
     ctx.beginPath();
@@ -797,20 +797,20 @@ class Game {
   _drawEntryExit(ctx) {
     const ep = PATH_POINTS[0];
     ctx.save();
-    // ENTER arrow (glowing cyan)
-    ctx.shadowColor  = '#00ffee';
+    // ENTER arrow
+    ctx.shadowColor  = STYLE.entryColor;
     ctx.shadowBlur   = 10;
-    ctx.fillStyle    = '#00ffee';
+    ctx.fillStyle    = STYLE.entryColor;
     ctx.globalAlpha  = 0.9;
     ctx.font         = 'bold 13px monospace';
     ctx.textAlign    = 'right';
     ctx.fillText('▶ ENTER', ep.x - 5, ep.y + 5);
 
-    // BASE arrow (glowing red)
+    // BASE arrow
     const xp = PATH_POINTS[PATH_POINTS.length - 1];
-    ctx.shadowColor = '#ff3344';
+    ctx.shadowColor = STYLE.exitColor;
     ctx.shadowBlur  = 10;
-    ctx.fillStyle   = '#ff3344';
+    ctx.fillStyle   = STYLE.exitColor;
     ctx.textAlign   = 'left';
     ctx.fillText('BASE ◀', xp.x + 5, xp.y + 5);
     ctx.restore();

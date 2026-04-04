@@ -234,3 +234,294 @@ body, html {
   text-shadow: 0 0 8px #00ffee55;
   box-shadow: 0 2px 16px #00ffee18;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ── STYLE SELECTOR (art-style picker on the title screen) ───────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+#styleSelector {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  margin: 12px 0 4px;
+}
+.style-label {
+  font-size: 12px; letter-spacing: 2px; color: #00aacc;
+  text-transform: uppercase; font-weight: bold;
+}
+.style-cards {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.style-card {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, #08081e, #0d0d28);
+  border: 2px solid #00ffee22; border-radius: 10px;
+  padding: 8px 12px; cursor: pointer; width: 110px;
+  transition: border-color .18s, box-shadow .18s, transform .12s;
+}
+.style-card:hover {
+  border-color: #00ffee66; box-shadow: 0 0 14px #00ffee22; transform: scale(1.04);
+}
+.style-card.selected {
+  border-color: #00ffee; box-shadow: 0 0 18px #00ffee44;
+}
+.style-swatch {
+  width: 80px; height: 44px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.style-card-name { font-size: 11px; font-weight: bold; color: #e0f8ff; text-align: center; }
+.style-card-sub  { font-size: 9px;  color: #6699aa; text-align: center; letter-spacing: 0.5px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ── ADDITIONAL KEYFRAME ANIMATIONS FOR NON-NEON STYLES ─────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes glowPulseClassic {
+  0%, 100% { text-shadow: 0 0 8px #88cc4499, 0 0 18px #66aa2266; }
+  50%       { text-shadow: 0 0 20px #88cc44bb, 0 0 40px #66aa2299, 0 0 70px #44880044; }
+}
+@keyframes glowPulseToxic {
+  0%, 100% { text-shadow: 0 0 8px #80ff4099, 0 0 18px #60cc2066; }
+  50%       { text-shadow: 0 0 20px #80ff40bb, 0 0 40px #60cc2099, 0 0 70px #40aa0044; }
+}
+@keyframes borderGlowClassic {
+  0%, 100% { box-shadow: 0 0 4px #88cc4418, inset 0 0 4px #88cc4408; }
+  50%       { box-shadow: 0 0 14px #88cc4444, inset 0 0 8px #88cc441a; }
+}
+@keyframes borderGlowToxic {
+  0%, 100% { box-shadow: 0 0 4px #80ff4018, inset 0 0 4px #80ff4008; }
+  50%       { box-shadow: 0 0 14px #80ff4044, inset 0 0 8px #80ff401a; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ── CLASSIC GARDEN THEME OVERRIDES ─────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-style="classic"] body,
+[data-style="classic"] html {
+  background: #0e1a08;
+}
+[data-style="classic"] #ui {
+  background: linear-gradient(180deg, #1a2810 0%, #0e1a08 55%, #1a2810 100%);
+  border-left-color: #88cc4428;
+  box-shadow: -4px 0 28px #44881818, -1px 0 0 #88cc4412;
+}
+[data-style="classic"] #ui::before {
+  background: radial-gradient(ellipse at 50% 90%, #88cc4406 0%, transparent 68%);
+}
+[data-style="classic"] #ui h2 {
+  color: #88cc44;
+  animation-name: glowPulseClassic;
+}
+[data-style="classic"] #ui { color: #c8e8a8; }
+[data-style="classic"] .stat-row {
+  background: linear-gradient(90deg, #1a2810, #223018);
+  border-color: #88cc441a;
+  animation-name: borderGlowClassic;
+}
+[data-style="classic"] .stat-val {
+  color: #88cc44; text-shadow: 0 0 6px #88cc4455;
+}
+[data-style="classic"] .tower-btn {
+  border-color: #88cc4422;
+  background: linear-gradient(135deg, #1a2810, #223018);
+  color: #c8e8a8;
+}
+[data-style="classic"] .tower-btn:hover {
+  border-color: #88cc44;
+  background: linear-gradient(135deg, #223018, #2a3820);
+  box-shadow: 0 0 10px #88cc4433;
+}
+[data-style="classic"] .tower-btn.selected {
+  border-color: #ffcc00;
+  background: linear-gradient(135deg, #282008, #201808);
+  box-shadow: 0 0 12px #ffcc0044;
+}
+[data-style="classic"] .tower-btn .tname { color: #e8f8c8; }
+[data-style="classic"] .tower-btn .tcost { color: #88cc44; }
+[data-style="classic"] #selectedInfo {
+  background: linear-gradient(135deg, #1a2810, #223018);
+  border-color: #88cc441a; color: #c8e8a8;
+}
+[data-style="classic"] .hint-text { color: #445533; }
+[data-style="classic"] #audioSection { border-top-color: #88cc4414; color: #446633; }
+[data-style="classic"] #audioSection input[type=file] { color: #446633; }
+[data-style="classic"] #overlay {
+  background: radial-gradient(ellipse at center, #1a2810 0%, rgba(8,16,4,0.97) 100%);
+}
+[data-style="classic"] #overlay::before {
+  background:
+    radial-gradient(ellipse at 20% 80%, #88cc4408 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 20%, #ffcc0008 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, #4488ff06 0%, transparent 60%);
+}
+[data-style="classic"] #overlay .gc1 { background: radial-gradient(circle, #88cc441a 0%, transparent 70%); }
+[data-style="classic"] #overlay .gc2 { background: radial-gradient(circle, #ffcc0014 0%, transparent 70%); }
+[data-style="classic"] #overlay .gc3 { background: radial-gradient(circle, #44aa8814 0%, transparent 70%); }
+[data-style="classic"] #overlay h1 {
+  color: #88cc44;
+  text-shadow: 0 0 20px #88cc44aa, 0 0 40px #66aa2277, 0 0 80px #44880044;
+  animation-name: glowPulseClassic;
+}
+[data-style="classic"] #overlay .subtitle { color: #aabb66; }
+[data-style="classic"] #overlay p { color: #c8e8a8; }
+[data-style="classic"] #overlay .how-to {
+  color: #88aa66;
+  background: linear-gradient(135deg, #1a2810, #223018);
+  border-color: #88cc4422;
+}
+[data-style="classic"] #overlay button {
+  background: linear-gradient(135deg, #0a3a0a, #1a801a);
+  border-color: #88cc4444;
+  box-shadow: 0 4px 22px #1a801a66, 0 0 40px #88cc4422;
+}
+[data-style="classic"] #overlay button:hover {
+  box-shadow: 0 6px 30px #1a801a99, 0 0 60px #88cc4444;
+}
+[data-style="classic"] #btnGenerateMap {
+  background: linear-gradient(135deg, #3a2800, #705020) !important;
+  border-color: #88664422 !important;
+  box-shadow: 0 4px 22px #70502066, 0 0 40px #88664422 !important;
+}
+[data-style="classic"] #btnGenerateMap:hover {
+  box-shadow: 0 6px 30px #70502099, 0 0 60px #88664444 !important;
+}
+[data-style="classic"] #overlay.map-preview {
+  background: radial-gradient(ellipse at center, rgba(26,40,16,0.68) 0%, rgba(8,16,4,0.75) 100%);
+}
+[data-style="classic"] #msgBox {
+  border-color: #88cc4422; color: #88cc44;
+  text-shadow: 0 0 8px #88cc4455; box-shadow: 0 2px 16px #88cc4418;
+}
+[data-style="classic"] #waveProgress {
+  background: linear-gradient(90deg, #228844, #88cc44);
+}
+[data-style="classic"] #waveProgressWrap > div { border-color: #88cc4422; }
+[data-style="classic"] #bossAlert span { color: #cc2222; }
+[data-style="classic"] #waveComposition { color: #88aa66; }
+[data-style="classic"] #nextBossInfo { color: #cc222255; }
+/* Style card overrides for classic theme */
+[data-style="classic"] .style-label { color: #88aa66; }
+[data-style="classic"] .style-card {
+  background: linear-gradient(135deg, #1a2810, #223018);
+  border-color: #88cc4422;
+}
+[data-style="classic"] .style-card:hover { border-color: #88cc4466; box-shadow: 0 0 14px #88cc4422; }
+[data-style="classic"] .style-card.selected { border-color: #88cc44; box-shadow: 0 0 18px #88cc4444; }
+[data-style="classic"] .style-card-name { color: #e8f8c8; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ── TOXIC WASTELAND THEME OVERRIDES ─────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-style="toxic"] body,
+[data-style="toxic"] html {
+  background: #050008;
+}
+[data-style="toxic"] #ui {
+  background: linear-gradient(180deg, #0a0020 0%, #060010 55%, #0a0020 100%);
+  border-left-color: #80ff4028;
+  box-shadow: -4px 0 28px #40ff2018, -1px 0 0 #80ff4012;
+}
+[data-style="toxic"] #ui::before {
+  background: radial-gradient(ellipse at 50% 90%, #80ff4006 0%, transparent 68%);
+}
+[data-style="toxic"] #ui h2 {
+  color: #80ff40;
+  animation-name: glowPulseToxic;
+}
+[data-style="toxic"] #ui { color: #c0ff80; }
+[data-style="toxic"] .stat-row {
+  background: linear-gradient(90deg, #0a0020, #100028);
+  border-color: #80ff401a;
+  animation-name: borderGlowToxic;
+}
+[data-style="toxic"] .stat-val {
+  color: #80ff40; text-shadow: 0 0 6px #80ff4055;
+}
+[data-style="toxic"] .tower-btn {
+  border-color: #80ff4022;
+  background: linear-gradient(135deg, #0a0020, #100028);
+  color: #c0ff80;
+}
+[data-style="toxic"] .tower-btn:hover {
+  border-color: #80ff40;
+  background: linear-gradient(135deg, #120030, #180038);
+  box-shadow: 0 0 10px #80ff4033;
+}
+[data-style="toxic"] .tower-btn.selected {
+  border-color: #ff8800;
+  background: linear-gradient(135deg, #200800, #280a00);
+  box-shadow: 0 0 12px #ff880044;
+}
+[data-style="toxic"] .tower-btn .tname { color: #c0ff80; }
+[data-style="toxic"] .tower-btn .tcost { color: #80ff40; }
+[data-style="toxic"] #selectedInfo {
+  background: linear-gradient(135deg, #0a0020, #100028);
+  border-color: #80ff401a; color: #c0ff80;
+}
+[data-style="toxic"] .hint-text { color: #304430; }
+[data-style="toxic"] #audioSection { border-top-color: #80ff4014; color: #406030; }
+[data-style="toxic"] #audioSection input[type=file] { color: #406030; }
+[data-style="toxic"] #overlay {
+  background: radial-gradient(ellipse at center, #0a0020 0%, rgba(2,0,8,0.97) 100%);
+}
+[data-style="toxic"] #overlay::before {
+  background:
+    radial-gradient(ellipse at 20% 80%, #80ff4008 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 20%, #ff880008 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, #4040ff06 0%, transparent 60%);
+}
+[data-style="toxic"] #overlay .gc1 { background: radial-gradient(circle, #80ff401a 0%, transparent 70%); }
+[data-style="toxic"] #overlay .gc2 { background: radial-gradient(circle, #ff880014 0%, transparent 70%); }
+[data-style="toxic"] #overlay .gc3 { background: radial-gradient(circle, #40ff8014 0%, transparent 70%); }
+[data-style="toxic"] #overlay h1 {
+  color: #80ff40;
+  text-shadow: 0 0 20px #80ff40aa, 0 0 40px #60cc2077, 0 0 80px #40aa0044;
+  animation-name: glowPulseToxic;
+}
+[data-style="toxic"] #overlay .subtitle { color: #60cc20; }
+[data-style="toxic"] #overlay p { color: #c0ff80; }
+[data-style="toxic"] #overlay .how-to {
+  color: #80aa60;
+  background: linear-gradient(135deg, #0a0020, #100028);
+  border-color: #80ff4022;
+}
+[data-style="toxic"] #overlay button {
+  background: linear-gradient(135deg, #0a2000, #207a00);
+  border-color: #80ff4044;
+  box-shadow: 0 4px 22px #208000aa, 0 0 40px #80ff4022;
+}
+[data-style="toxic"] #overlay button:hover {
+  box-shadow: 0 6px 30px #20a000cc, 0 0 60px #80ff4044;
+}
+[data-style="toxic"] #btnGenerateMap {
+  background: linear-gradient(135deg, #200800, #6a2800) !important;
+  border-color: #804400 !important;
+  box-shadow: 0 4px 22px #6a280066, 0 0 40px #80440022 !important;
+}
+[data-style="toxic"] #btnGenerateMap:hover {
+  box-shadow: 0 6px 30px #6a280099, 0 0 60px #80440044 !important;
+}
+[data-style="toxic"] #overlay.map-preview {
+  background: radial-gradient(ellipse at center, rgba(10,0,32,0.68) 0%, rgba(2,0,8,0.75) 100%);
+}
+[data-style="toxic"] #msgBox {
+  border-color: #80ff4022; color: #80ff40;
+  text-shadow: 0 0 8px #80ff4055; box-shadow: 0 2px 16px #80ff4018;
+}
+[data-style="toxic"] #waveProgress {
+  background: linear-gradient(90deg, #208800, #80ff40);
+}
+[data-style="toxic"] #waveProgressWrap > div { border-color: #80ff4022; }
+[data-style="toxic"] #bossAlert span { color: #ff4000; }
+[data-style="toxic"] #waveComposition { color: #80aa60; }
+[data-style="toxic"] #nextBossInfo { color: #ff400055; }
+/* Style card overrides for toxic theme */
+[data-style="toxic"] .style-label { color: #60cc20; }
+[data-style="toxic"] .style-card {
+  background: linear-gradient(135deg, #0a0020, #100028);
+  border-color: #80ff4022;
+}
+[data-style="toxic"] .style-card:hover { border-color: #80ff4066; box-shadow: 0 0 14px #80ff4022; }
+[data-style="toxic"] .style-card.selected { border-color: #80ff40; box-shadow: 0 0 18px #80ff4044; }
+[data-style="toxic"] .style-card-name { color: #c0ff80; }
+
