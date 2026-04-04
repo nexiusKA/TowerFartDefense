@@ -153,7 +153,16 @@ class Game {
       const bonus = 50 + this.waveManager.waveNum * 5;
       this.gold += bonus;
       document.getElementById('btnNextWave').disabled = false;
-      showMessage(`✅ Wave ${this.waveManager.waveNum} cleared! +${bonus}g bonus!`);
+      const clearQuips = [
+        '💨 The stink has been contained… for now.',
+        '👃 Phew! Another wave survived!',
+        '🤢 Your nose is stronger than your enemies!',
+        '💩 The sewers weep in defeat!',
+        '☠️ Absolutely foul — great work!',
+        '🌬️ Fresh(ish) air restored!',
+      ];
+      const quip = clearQuips[this.waveManager.waveNum % clearQuips.length];
+      showMessage(`✅ Wave ${this.waveManager.waveNum} cleared! +${bonus}g · ${quip}`);
       this.updateUI();
     }
   }
@@ -504,7 +513,7 @@ class Game {
             ctx.font = `bold ${TILE * 0.16}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            const labels = [['APT','4B'], ['FOR','RENT'], ['PIZZA','KING'], ['BODEGA','NYC']];
+            const labels = [['STINK','CITY'], ['GAS','LEAK!'], ['SEWER','CO.'], ['FART','ZONE']];
             const lbl = labels[c % labels.length];
             ctx.fillText(lbl[0], x + TILE * 0.5, y + TILE * 0.32);
             ctx.fillText(lbl[1], x + TILE * 0.5, y + TILE * 0.50);
@@ -841,7 +850,15 @@ class Game {
     this.selectedTowerType = null;
     document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove('selected'));
     this.updateUI();
-    showMessage(`${def.name} placed!`);
+    const placeQuips = [
+      '🤢 Absolutely rancid placement!',
+      '💨 Now THAT\'s a stench!',
+      '👃 The sewers tremble!',
+      '💩 Smell ya later, moles!',
+      '☠️ Maximum stink deployed!',
+    ];
+    const quip = placeQuips[Math.floor(Math.random() * placeQuips.length)];
+    showMessage(`${def.name} placed! ${quip}`);
   }
 
   _trySelectTower(lx, ly) {
@@ -931,12 +948,20 @@ class Game {
 
   gameOver() {
     this.over = true;
+    const stinkTaunts = [
+      '💨 The stench was too strong…',
+      '🤢 You\'ve been out-stunk!',
+      '💩 The moles reclaimed the sewers!',
+      '👃 Your nose AND your base couldn\'t take it!',
+    ];
+    const taunt = stinkTaunts[Math.floor(Math.random() * stinkTaunts.length)];
     const ov  = document.getElementById('overlay');
     ov.innerHTML =
       `<h1>💀 Game Over</h1>` +
+      `<p style="color:#ff88cc;font-size:18px">${taunt}</p>` +
       `<p>Survived <strong>${this.waveManager.waveNum}</strong> wave${this.waveManager.waveNum !== 1 ? 's' : ''}</p>` +
       `<p>Kills: <strong>${this.kills}</strong> · Gold earned: <strong>${this.gold}</strong>g</p>` +
-      `<button onclick="location.reload()">🔄 Try Again</button>`;
+      `<button onclick="location.reload()">🔄 Try Again (if you dare)</button>`;
     ov.style.display = 'flex';
   }
 
@@ -1055,7 +1080,9 @@ class Game {
       t.range = t.def.range + (t.level - 1) * t.def.upgradeRange;
       this.updateUI();
       this._updateSelectedInfo();
-      showMessage(`${t.def.name} upgraded to level ${t.level}!`);
+      const upgradeQuips = ['Even stinkier!', 'Rancid power unlocked!', 'Now THAT reeks!', 'Maximum funk engaged!'];
+      const quip = upgradeQuips[Math.floor(Math.random() * upgradeQuips.length)];
+      showMessage(`${t.def.name} Lv${t.level}! ${quip}`);
     });
 
     document.getElementById('sellBtn').addEventListener('click', () => {
@@ -1069,7 +1096,7 @@ class Game {
       this.towers = this.towers.filter(tw => tw !== t);
       this._deselectTower();
       this.updateUI();
-      showMessage(`Sold for ${gain}g`);
+      showMessage(`Sold for ${gain}g 💸 The stench lingers…`);
     });
 
     // Keyboard shortcuts

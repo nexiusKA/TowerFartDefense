@@ -23,7 +23,7 @@ document.getElementById('btnGenerateMap').addEventListener('click', () => {
   game.regenerateMap();
   // Make overlay semi-transparent so the new map is visible behind it
   document.getElementById('overlay').classList.add('map-preview');
-  document.getElementById('mapGenHint').textContent = '💩 New map generated! Click again for another layout.';
+  document.getElementById('mapGenHint').textContent = '💩 New stinky map generated! Click again for a different layout.';
 });
 
 // ── Art-style selector ────────────────────────────────────────────────────────
