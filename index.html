@@ -29,7 +29,7 @@
     <div class="stat-row"><span>💀 Kills</span><span class="stat-val" id="statKills">0</span></div>
     <div class="stat-row"><span>👾 Enemies</span><span class="stat-val" id="statEnemies">0</span></div>
 
-    <div style="color:#aaa;font-size:11px;margin-top:2px;">Select Tower (or press 1–5):</div>
+    <div style="color:#aaa;font-size:11px;margin-top:2px;">Select Tower (or press 1–7):</div>
     <div id="towerButtons">
       <button class="tower-btn" data-type="stinker">
         <div class="tname">🟢 Stench Lord</div>
@@ -56,6 +56,16 @@
         <div>Massive AOE blast · Hits ALL in range</div>
         <div class="tcost">200g · [5]</div>
       </button>
+      <button class="tower-btn" data-type="spraycan">
+        <div class="tname">💨 Spray Can</div>
+        <div>Brown mist spray · Fast fire · Single target</div>
+        <div class="tcost">90g · [6]</div>
+      </button>
+      <button class="tower-btn" data-type="toothpaste">
+        <div class="tname">🦷 Toothpaste</div>
+        <div>Brown paste pierce · Long range · Sees stealth</div>
+        <div class="tcost">130g · [7]</div>
+      </button>
     </div>
 
     <div id="selectedInfo"></div>
@@ -79,6 +89,8 @@
       <label>Toilet:      <input type="file" accept="audio/*" id="audioHonker"></label>
       <label>Sewer Gas:   <input type="file" accept="audio/*" id="audioFogger"></label>
       <label>Toilet Brush: <input type="file" accept="audio/*" id="audioSuperblast"></label>
+      <label>Spray Can:   <input type="file" accept="audio/*" id="audioSpraycan"></label>
+      <label>Toothpaste:  <input type="file" accept="audio/*" id="audioToothpaste"></label>
     </div>
   </div>
 </div>

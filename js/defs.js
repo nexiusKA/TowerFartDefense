@@ -53,6 +53,26 @@ const TOWER_DEFS = {
     desc: 'Massive AOE blast · Hits ALL enemies in range',
     effect: 'superblast',
   },
+  spraycan: {
+    name: 'Spray Can', cost: 90, sellRatio: 0.6,
+    color: '#6b3a1e', color2: '#8B4513',
+    range: 62, damage: 8, fireRate: 800,
+    sound: 'spraycan',
+    upgradeCost: 70,
+    upgradeDmg: 4, upgradeRange: 8, upgradeFireRate: -100,
+    desc: 'Sprays brown mist · Fast fire · Single target',
+    effect: 'spray',
+  },
+  toothpaste: {
+    name: 'Toothpaste', cost: 130, sellRatio: 0.6,
+    color: '#7a5c10', color2: '#c8a020',
+    range: 92, damage: 14, fireRate: 1100,
+    sound: 'toothpaste',
+    upgradeCost: 100,
+    upgradeDmg: 8, upgradeRange: 11, upgradeFireRate: -130,
+    desc: 'Brown paste pierce · Long range · Sees stealth',
+    effect: 'paste',
+  },
 };
 
 const ENEMY_DEFS = {

@@ -1080,8 +1080,8 @@ class Game {
         document.querySelectorAll('.tower-btn').forEach(b => b.classList.remove('selected'));
         this._deselectTower();
       }
-      // Number keys 1-4 to select tower types
-      const towerKeys = ['1', '2', '3', '4', '5'];
+      // Number keys 1-7 to select tower types
+      const towerKeys = ['1', '2', '3', '4', '5', '6', '7'];
       const towerTypes = Object.keys(TOWER_DEFS);
       const idx = towerKeys.indexOf(e.key);
       if (idx !== -1 && towerTypes[idx]) {

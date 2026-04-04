@@ -87,8 +87,8 @@ class Tower {
     let best = null, bestDist = Infinity;
     for (const e of game.enemies) {
       if (e.dead || e.reached) continue;
-      // Only honker (pierce) can target invisible stealth moles
-      if (e.isStealthy && !e.stealthVisible && this.type !== 'honker') continue;
+      // Only honker (pierce) and toothpaste (paste) can target invisible stealth moles
+      if (e.isStealthy && !e.stealthVisible && this.type !== 'honker' && this.type !== 'toothpaste') continue;
       const d = Math.hypot(e.x - this.x, e.y - this.y);
       if (d <= this.range && d < bestDist) { best = e; bestDist = d; }
     }
@@ -184,8 +184,10 @@ class Tower {
       ctx.save();
       const prog = this.flashTimer / 150;
       // Each tower has a themed fart-burst color
-      const flashCol = this.type === 'stinker' ? '#8dc829'
-                     : this.type === 'blaster' ? '#c8a020'
+      const flashCol = this.type === 'stinker'   ? '#8dc829'
+                     : this.type === 'blaster'   ? '#c8a020'
+                     : this.type === 'spraycan'  ? '#6b3a1e'
+                     : this.type === 'toothpaste' ? '#c8a020'
                      : '#8B4513';  // toilet (brown poop burst)
       const flashGrd = ctx.createRadialGradient(x, y, s, x, y, s + 14 + (1 - prog) * 22);
       flashGrd.addColorStop(0, flashCol + Math.min(255, Math.round(prog * 220)).toString(16).padStart(2, '0'));
@@ -802,6 +804,188 @@ class Tower {
         ctx.arc(x, headCy, s * (1.1 + 3.2 * (1 - prog)), 0, Math.PI * 2);
         ctx.stroke();
         ctx.shadowBlur  = 0;
+        ctx.restore();
+      }
+    } else if (this.type === 'spraycan') {
+      // ── Spray Can — cylindrical brown aerosol can with nozzle ─────────────
+
+      // Can body (brown cylinder)
+      const canGrd = ctx.createLinearGradient(x - s * 0.42, 0, x + s * 0.42, 0);
+      canGrd.addColorStop(0, '#3a1a08');
+      canGrd.addColorStop(0.35, '#6b3a1e');
+      canGrd.addColorStop(0.65, '#8B4513');
+      canGrd.addColorStop(1, '#3a1a08');
+      ctx.fillStyle = canGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.4, y - s * 0.9, s * 0.8, s * 1.72, 8);
+      ctx.fill();
+      // Highlight sheen
+      ctx.fillStyle = 'rgba(255,200,150,0.12)';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.3, y - s * 0.82, s * 0.18, s * 1.55, 4);
+      ctx.fill();
+      // Brown label band
+      ctx.fillStyle = '#4a2208';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.4, y - s * 0.08, s * 0.8, s * 0.52, 0);
+      ctx.fill();
+      // Label text (poop emoji)
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = '#a05828';
+      ctx.font = `bold ${s * 0.38}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('💩', x, y + s * 0.18);
+      ctx.restore();
+      // Top cap
+      const topCapGrd = ctx.createLinearGradient(x - s * 0.38, y - s * 0.9, x + s * 0.38, y - s * 0.9);
+      topCapGrd.addColorStop(0, '#2a0e04');
+      topCapGrd.addColorStop(0.5, '#5a2a10');
+      topCapGrd.addColorStop(1, '#2a0e04');
+      ctx.fillStyle = topCapGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.32, y - s * 1.05, s * 0.64, s * 0.2, 5);
+      ctx.fill();
+      // Nozzle tip
+      ctx.fillStyle = '#c87830';
+      ctx.beginPath();
+      ctx.roundRect(x + s * 0.06, y - s * 1.22, s * 0.22, s * 0.2, 3);
+      ctx.fill();
+      // Nozzle hole
+      ctx.fillStyle = '#1a0a04';
+      ctx.beginPath();
+      ctx.arc(x + s * 0.24, y - s * 1.14, s * 0.055, 0, Math.PI * 2);
+      ctx.fill();
+      // Animated brown spray droplets from nozzle
+      ctx.globalAlpha = 0.55;
+      for (let i = 0; i < 4; i++) {
+        const ang = -0.35 + (i - 1.5) * 0.25;
+        const dist = s * (0.55 + 0.3 * Math.abs(Math.sin(this.ringAnim * 2.5 + i)));
+        const dx2 = x + s * 0.24 + Math.cos(ang) * dist;
+        const dy2 = y - s * 1.14 + Math.sin(ang) * dist;
+        ctx.fillStyle = i % 2 === 0 ? '#6b3a1e' : '#8B4513';
+        ctx.beginPath();
+        ctx.arc(dx2, dy2, s * (0.06 - i * 0.01), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // Attack animation: brown spray burst
+      if (this.attackAnim > 0) {
+        const prog = this.attackAnim;
+        ctx.save();
+        const burstR = s * (1.0 + 2.2 * (1 - prog));
+        const burstAlpha = prog * 0.7;
+        const burstGrd = ctx.createRadialGradient(x + s * 0.24, y - s * 1.14, 0, x + s * 0.24, y - s * 1.14, burstR);
+        burstGrd.addColorStop(0, `rgba(139,69,19,${burstAlpha})`);
+        burstGrd.addColorStop(0.5, `rgba(80,35,5,${burstAlpha * 0.5})`);
+        burstGrd.addColorStop(1, 'rgba(40,10,2,0)');
+        ctx.fillStyle = burstGrd;
+        ctx.beginPath();
+        ctx.arc(x + s * 0.24, y - s * 1.14, burstR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+    } else if (this.type === 'toothpaste') {
+      // ── Toothpaste Tube — squeezed brown paste tube ───────────────────────
+
+      // Tube body
+      const tubeGrd = ctx.createLinearGradient(x - s * 0.44, 0, x + s * 0.44, 0);
+      tubeGrd.addColorStop(0, '#2e1e04');
+      tubeGrd.addColorStop(0.3, '#7a5c10');
+      tubeGrd.addColorStop(0.65, '#c8a020');
+      tubeGrd.addColorStop(1, '#2e1e04');
+      ctx.fillStyle = tubeGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.42, y - s * 0.3, s * 0.84, s * 1.12, 6);
+      ctx.fill();
+      // Crinkled bottom (squeezed look)
+      ctx.fillStyle = '#3a2808';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.42, y + s * 0.58, s * 0.84, s * 0.24, [0, 0, 5, 5]);
+      ctx.fill();
+      // Fold lines on squished bottom
+      ctx.strokeStyle = '#1a1004';
+      ctx.lineWidth = 1.2;
+      ctx.globalAlpha = 0.55;
+      for (let i = 0; i < 3; i++) {
+        const fy = y + s * (0.64 + i * 0.06);
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.36 + i * 2, fy);
+        ctx.lineTo(x + s * 0.36 - i * 2, fy);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      // Highlight stripe
+      ctx.fillStyle = 'rgba(255,240,180,0.14)';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.3, y - s * 0.24, s * 0.16, s * 0.8, 3);
+      ctx.fill();
+      // Label band (dark brown)
+      ctx.fillStyle = '#4a3408';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.42, y + s * 0.08, s * 0.84, s * 0.32, 0);
+      ctx.fill();
+      // Toothbrush icon on label
+      ctx.save();
+      ctx.globalAlpha = 0.65;
+      ctx.fillStyle = '#c8a020';
+      ctx.font = `bold ${s * 0.36}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🦷', x, y + s * 0.24);
+      ctx.restore();
+      // Neck / shoulder taper
+      const neckGrd = ctx.createLinearGradient(x - s * 0.22, 0, x + s * 0.22, 0);
+      neckGrd.addColorStop(0, '#2e1e04');
+      neckGrd.addColorStop(0.5, '#9a7818');
+      neckGrd.addColorStop(1, '#2e1e04');
+      ctx.fillStyle = neckGrd;
+      ctx.beginPath();
+      ctx.moveTo(x - s * 0.42, y - s * 0.3);
+      ctx.lineTo(x - s * 0.16, y - s * 0.62);
+      ctx.lineTo(x + s * 0.16, y - s * 0.62);
+      ctx.lineTo(x + s * 0.42, y - s * 0.3);
+      ctx.closePath();
+      ctx.fill();
+      // Cap / nozzle
+      ctx.fillStyle = '#5a3a08';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.14, y - s * 0.88, s * 0.28, s * 0.3, 4);
+      ctx.fill();
+      // Nozzle opening
+      ctx.fillStyle = '#8B4513';
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.07, y - s * 1.02, s * 0.14, s * 0.16, 3);
+      ctx.fill();
+      // Brown paste oozing from tip
+      const oozeLen = s * (0.18 + 0.12 * Math.abs(Math.sin(this.ringAnim)));
+      const oozeGrd = ctx.createLinearGradient(x, y - s * 1.02, x, y - s * 1.02 - oozeLen);
+      oozeGrd.addColorStop(0, '#8B4513');
+      oozeGrd.addColorStop(1, '#6b3a1e');
+      ctx.fillStyle = oozeGrd;
+      ctx.beginPath();
+      ctx.roundRect(x - s * 0.06, y - s * 1.02 - oozeLen, s * 0.12, oozeLen, 3);
+      ctx.fill();
+      // Attack animation: paste beam
+      if (this.attackAnim > 0) {
+        const prog = this.attackAnim;
+        const beamLen = s * (2.8 + 2.2 * (1 - prog));
+        const dirX = 0, dirY = -1;
+        const bx0 = x, by0 = y - s * 1.04;
+        ctx.save();
+        const pasteGrd = ctx.createLinearGradient(bx0, by0, bx0 + dirX * beamLen, by0 + dirY * beamLen);
+        pasteGrd.addColorStop(0, `rgba(139,69,19,${prog * 0.9})`);
+        pasteGrd.addColorStop(0.5, `rgba(122,92,16,${prog * 0.65})`);
+        pasteGrd.addColorStop(1, 'rgba(50,30,0,0)');
+        ctx.strokeStyle = pasteGrd;
+        ctx.lineWidth = s * 0.28 * prog;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(bx0, by0);
+        ctx.lineTo(bx0 + dirX * beamLen, by0 + dirY * beamLen);
+        ctx.stroke();
         ctx.restore();
       }
     }

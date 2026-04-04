@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-const customSounds = { stinker: null, blaster: null, honker: null, fogger: null, superblast: null };
+const customSounds = { stinker: null, blaster: null, honker: null, fogger: null, superblast: null, spraycan: null, toothpaste: null };
 
 // Default fart sounds mapped to each tower type
 const DEFAULT_SOUNDS = {
@@ -12,10 +12,12 @@ const DEFAULT_SOUNDS = {
   honker:  'voice_28-03-2026_13-59-31.mp3',
   fogger:  'voice_28-03-2026_14-05-59.mp3',
   superblast: 'super_blast.mp3',
+  spraycan:   'awful.mp3',
+  toothpaste: '6_of_10.mp3',
 };
-const defaultSounds = { stinker: null, blaster: null, honker: null, fogger: null, superblast: null };
+const defaultSounds = { stinker: null, blaster: null, honker: null, fogger: null, superblast: null, spraycan: null, toothpaste: null };
 // Duration (ms) of the active sound for each tower type; null = use def.fireRate
-const soundDurations = { stinker: null, blaster: null, honker: null, fogger: null, superblast: null };
+const soundDurations = { stinker: null, blaster: null, honker: null, fogger: null, superblast: null, spraycan: null, toothpaste: null };
 
 function loadDefaultSounds() {
   Object.entries(DEFAULT_SOUNDS).forEach(([type, file]) => {
@@ -72,6 +74,20 @@ function playFallbackSound(type) {
       gain.gain.setValueAtTime(0.38, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.75);
       osc.start(); osc.stop(ctx.currentTime + 0.75);
+    } else if (type === 'spraycan') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(280, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.start(); osc.stop(ctx.currentTime + 0.22);
+    } else if (type === 'toothpaste') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(); osc.stop(ctx.currentTime + 0.4);
     }
   } catch (_) {}
 }
@@ -87,7 +103,7 @@ function playSound(type) {
 }
 
 function initAudioFileInputs() {
-  ['stinker', 'blaster', 'honker', 'fogger', 'superblast'].forEach(t => {
+  ['stinker', 'blaster', 'honker', 'fogger', 'superblast', 'spraycan', 'toothpaste'].forEach(t => {
     const el = document.getElementById('audio' + t.charAt(0).toUpperCase() + t.slice(1));
     if (!el) return;
     el.addEventListener('change', function () {
