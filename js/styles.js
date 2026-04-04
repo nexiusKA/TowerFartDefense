@@ -30,7 +30,8 @@ const STYLES = {
 
     // Road
     roadSheen1: 'rgba(80,50,20,0.08)', roadSheen2: 'rgba(40,20,5,0.08)',
-    roadLane:   '#d4a82099',
+    roadLane:       '#d4a82099',
+    roadLaneShadow: '#d4a820',
 
     // Sidewalk
     sidewalkGrid:  '#7a5830',
@@ -84,7 +85,8 @@ const STYLES = {
     mortar: '#706050',
 
     roadSheen1: 'rgba(60,60,60,0.08)', roadSheen2: 'rgba(30,30,30,0.08)',
-    roadLane:   '#cccc4499',
+    roadLane:       '#cccc4499',
+    roadLaneShadow: '#cccc44',
 
     sidewalkGrid:  '#908070',
     sidewalkCrack: '#706050',
@@ -130,7 +132,8 @@ const STYLES = {
     mortar: '#3a1860',
 
     roadSheen1: 'rgba(40,80,10,0.10)', roadSheen2: 'rgba(20,40,5,0.10)',
-    roadLane:   '#80ff4099',
+    roadLane:       '#80ff4099',
+    roadLaneShadow: '#80ff40',
 
     sidewalkGrid:  '#4a2870',
     sidewalkCrack: '#3a1858',

@@ -40,6 +40,6 @@ document.querySelectorAll('.style-card').forEach(card => {
     setStyle(card.dataset.style);
     document.getElementById('overlaySubtitle').textContent = STYLE_SUBTITLES[card.dataset.style];
     // Re-render the map preview with the new style if already generated
-    game._render();
+    game.render();
   });
 });

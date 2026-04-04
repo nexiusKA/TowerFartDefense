@@ -99,7 +99,10 @@ class Game {
     requestAnimationFrame(t => this._loop(t));
   }
 
-  _loop(ts) {
+  /** Public method to force a single re-render (used for map/style previews). */
+  render() { this._render(); }
+
+
     if (this.over) return;
     const rawDt = Math.min(ts - this.lastTime, 100);
     this.lastTime = ts;
@@ -520,7 +523,7 @@ class Game {
 
           // Centre lane dashes
           if (r % 2 === 0) {
-            ctx.shadowColor = STYLE.roadLane.slice(0, 7);
+            ctx.shadowColor = STYLE.roadLaneShadow;
             ctx.shadowBlur  = 2;
             ctx.strokeStyle = STYLE.roadLane;
             ctx.lineWidth   = 1.5;
