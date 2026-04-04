@@ -102,7 +102,7 @@ class Game {
   /** Public method to force a single re-render (used for map/style previews). */
   render() { this._render(); }
 
-
+  _loop(ts) {
     if (this.over) return;
     const rawDt = Math.min(ts - this.lastTime, 100);
     this.lastTime = ts;
