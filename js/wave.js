@@ -2,7 +2,23 @@
 // WAVE SYSTEM
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Build a flat spawn queue for wave number w.
+// Rotating stinky wave-start messages
+const WAVE_START_MSGS = [
+  (n, total) => `💨 Wave ${n} — ${total} stinky moles incoming!`,
+  (n, total) => `🤢 Sniff that? Wave ${n}: ${total} moles on the move!`,
+  (n, total) => `👃 YIKES — Wave ${n}! ${total} moles breaching the sewers!`,
+  (n, total) => `💩 Wave ${n} — ${total} moles raring to stink up your base!`,
+  (n, total) => `☠️ The sewers bubble… Wave ${n} is here! ${total} enemies!`,
+  (n, total) => `🌊 Wave ${n} incoming! Hold your nose — ${total} moles!`,
+];
+
+const BOSS_WAVE_MSGS = [
+  (n) => `💀 BOSS WAVE ${n}! The Grand Stench Lord himself approaches! 💀`,
+  (n) => `💀 BOSS WAVE ${n}! Maximum stink inbound — brace yourselves! 💀`,
+  (n) => `☠️ BOSS WAVE ${n}! Absolutely rancid power incoming! ☠️`,
+];
+
+
 // hp scale grows 8 % per wave so enemies get progressively tougher.
 function buildWave(w) {
   const hpScale   = Math.pow(1.08, w - 1);
@@ -65,7 +81,14 @@ class WaveManager {
     this.active     = true;
     this.bonusGiven = false;
     document.getElementById('btnNextWave').disabled = true;
-    showMessage(`🌊 Wave ${this.waveNum} incoming! ${this.totalInWave} enemies`);
+    const isBossWave = this.waveNum % 5 === 0 && this.waveNum > 0;
+    if (isBossWave) {
+      const bossMsgs = BOSS_WAVE_MSGS;
+      showMessage(bossMsgs[Math.floor(this.waveNum / 5 - 1) % bossMsgs.length](this.waveNum));
+    } else {
+      const msgs = WAVE_START_MSGS;
+      showMessage(msgs[(this.waveNum - 1) % msgs.length](this.waveNum, this.totalInWave));
+    }
     game.updateUI();
   }
 
