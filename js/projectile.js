@@ -20,7 +20,7 @@ class Projectile {
 
   update(dt) {
     this.wobblePhase += dt * 0.007;
-    if (this.def.effect === 'pierce') {
+    if (this.def.effect === 'pierce' || this.def.effect === 'paste') {
       this._movePierce(dt);
     } else {
       this._moveTracking(dt);
@@ -52,6 +52,22 @@ class Projectile {
           Math.random() < 0.5 ? '#8B4513' : '#6b3010',
           (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3,
           180, 2.5 + Math.random() * 2.5, 'gas'
+        ));
+      } else if (this.def.effect === 'spray') {
+        particles.push(new Particle(
+          this.x + (Math.random() - 0.5) * 5,
+          this.y + (Math.random() - 0.5) * 5,
+          Math.random() < 0.5 ? '#6b3a1e' : '#8B4513',
+          (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * 0.6 - 0.2,
+          160, 2.5 + Math.random() * 3.5, 'gas'
+        ));
+      } else if (this.def.effect === 'paste') {
+        particles.push(new Particle(
+          this.x + (Math.random() - 0.5) * 3,
+          this.y + (Math.random() - 0.5) * 3,
+          Math.random() < 0.5 ? '#7a5c10' : '#c8a020',
+          (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.3,
+          200, 2 + Math.random() * 2, 'gas'
         ));
       }
     }
@@ -246,6 +262,100 @@ class Projectile {
         const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 7);
         grd.addColorStop(0, '#c07840cc');
         grd.addColorStop(1, '#8B451300');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+    } else if (this.def.effect === 'spray') {
+      // ── Spraycan: brown mist puff cloud ──────────────────────────────────
+      const hazeGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 22);
+      hazeGrd.addColorStop(0, 'rgba(107,58,30,0.22)');
+      hazeGrd.addColorStop(1, 'rgba(60,20,5,0)');
+      ctx.fillStyle = hazeGrd;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      // Wobbly brown mist lobes
+      const sLobes = [
+        [0, 0, 8 + Math.sin(wp) * 1.4],
+        [Math.cos(wp + 1.0) * 5, Math.sin(wp + 1.0) * 4, 6.5 + Math.cos(wp * 1.2) * 1.1],
+        [Math.cos(wp + 3.5) * 6, Math.sin(wp + 3.5) * 5, 7 + Math.sin(wp * 0.9) * 1.3],
+      ];
+      for (const [lx, ly, lr] of sLobes) {
+        const grd = ctx.createRadialGradient(this.x + lx - lr * 0.2, this.y + ly - lr * 0.2, 0,
+                                             this.x + lx, this.y + ly, lr);
+        grd.addColorStop(0, '#a05828cc');
+        grd.addColorStop(0.5, '#6b3a1e88');
+        grd.addColorStop(1, '#3a1a0800');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(this.x + lx, this.y + ly, lr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Small spray droplets orbiting
+      for (let i = 0; i < 3; i++) {
+        const bx = this.x + Math.cos(wp * 0.9 + i * 2.1) * 12;
+        const by = this.y + Math.sin(wp * 0.9 + i * 2.1) * 10;
+        ctx.fillStyle = 'rgba(139,69,19,0.45)';
+        ctx.beginPath();
+        ctx.arc(bx, by, 2 + i * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+    } else if (this.def.effect === 'paste') {
+      // ── Toothpaste: brown paste streak (piercing) ─────────────────────────
+      const glowGrd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 15);
+      glowGrd.addColorStop(0, 'rgba(122,92,16,0.4)');
+      glowGrd.addColorStop(1, 'rgba(50,30,0,0)');
+      ctx.fillStyle = glowGrd;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (this.dir) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(Math.atan2(this.dir.y, this.dir.x));
+        // Tube-shaped paste blob along travel direction
+        const pData = [
+          [12, 0, 5.5 + Math.sin(wp) * 0.9],
+          [0, Math.sin(wp * 0.9) * 1.2, 5 + Math.cos(wp * 1.1) * 0.8],
+          [-10, Math.sin(wp * 1.1) * 1.6, 4 + Math.sin(wp * 0.8) * 0.7],
+          [-18, Math.sin(wp * 0.8) * 1.8, 3 + Math.cos(wp) * 0.5],
+        ];
+        const pCols = [
+          'rgba(160,120,20,0.88)',
+          'rgba(122,92,16,0.75)',
+          'rgba(100,72,10,0.65)',
+          'rgba(75,50,5,0.45)',
+        ];
+        for (let i = 0; i < 4; i++) {
+          const [puffX, puffY, puffRadius] = pData[i];
+          const grd = ctx.createRadialGradient(puffX - puffRadius * 0.15, puffY - puffRadius * 0.15, 0, puffX, puffY, puffRadius);
+          grd.addColorStop(0, '#e0c060');
+          grd.addColorStop(0.5, pCols[i]);
+          grd.addColorStop(1, 'rgba(40,20,0,0)');
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(puffX, puffY, puffRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // Central paste streak
+        const pasteGrd = ctx.createLinearGradient(-18, 0, 14, 0);
+        pasteGrd.addColorStop(0, 'rgba(50,30,0,0)');
+        pasteGrd.addColorStop(0.5, 'rgba(122,92,16,0.6)');
+        pasteGrd.addColorStop(1, '#c8a020aa');
+        ctx.fillStyle = pasteGrd;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 16, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else {
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 7);
+        grd.addColorStop(0, '#c8a020cc');
+        grd.addColorStop(1, '#7a5c1000');
         ctx.fillStyle = grd;
         ctx.beginPath();
         ctx.arc(this.x, this.y, 7, 0, Math.PI * 2);
