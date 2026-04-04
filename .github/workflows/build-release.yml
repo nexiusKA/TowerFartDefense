@@ -113,7 +113,7 @@ jobs:
 
           if (hasErrors) process.exit(1);
           EOF
-          node /tmp/check-syntax.js
+          NODE_PATH=$(pwd)/node_modules node /tmp/check-syntax.js
 
   deploy:
     runs-on: ubuntu-latest
